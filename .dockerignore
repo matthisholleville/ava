@@ -1,0 +1,32 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Go workspace file
+go.work
+
+# Go modules
+vendor/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+
+# Dependency directories
+vendor/
+Godeps/
+
+# Build directories
+bin/
+build/
+.envrc

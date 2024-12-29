@@ -16,6 +16,7 @@ package main
 
 import (
 	"github.com/matthisholleville/ava/cmd"
+	_ "go.uber.org/automaxprocs"
 )
 
 func main() {

@@ -24,10 +24,12 @@ import (
 
 	_ "github.com/matthisholleville/ava/docs"
 	db "github.com/matthisholleville/ava/internal/prisma"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/matthisholleville/ava/pkg/logger"
+	"github.com/matthisholleville/ava/pkg/metrics"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"go.uber.org/zap"
 )
@@ -95,7 +97,12 @@ func (s *Server) registerHandlers() {
 }
 
 func (s *Server) registerMiddlewares() {
-	s.router.Use(echoprometheus.NewMiddleware("ava"))
+	customMetrics := metrics.NewMetrics()
+	customMetrics.RegisterCustomMetrics()
+	s.router.Use(echoprometheus.NewMiddlewareWithConfig(echoprometheus.MiddlewareConfig{
+		Registerer: prometheus.DefaultRegisterer,
+		Namespace:  "ava",
+	}))
 }
 
 func (s *Server) ListenAndServe() (*echo.Echo, *int32, *int32) {

@@ -25,6 +25,7 @@ import (
 	"github.com/matthisholleville/ava/pkg/common"
 	"github.com/matthisholleville/ava/pkg/executors"
 	"github.com/matthisholleville/ava/pkg/logger"
+	"github.com/matthisholleville/ava/pkg/metrics"
 	"github.com/sashabaranov/go-openai"
 )
 
@@ -147,6 +148,7 @@ func (c *OpenAIClient) watchRun(e common.Executor, threadId, runId string) (*ope
 			for _, f := range functionsToBeCalled.ToolCalls {
 
 				c.logger.Info(fmt.Sprintf("Execution of the function : %s", f.Function.Name))
+				metrics.ExecutorCounter.WithLabelValues(f.Function.Name).Inc()
 				outputs = append(outputs, openai.ToolOutput{
 					ToolCallID: f.ID,
 					Output:     executors[f.Function.Name].Exec(e, f.Function.Arguments),

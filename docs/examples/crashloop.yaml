@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server
+  labels:
+    app: web-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-server
+  template:
+    metadata:
+      labels:
+        app: web-server
+    spec:
+      containers:
+      - name: web-server
+        image: python:3.11-slim
+        ports:
+        - containerPort: 8080
+        command: ["python3"]
+        args:
+        - "-c"
+        - |
+          import http.server
+          import socketserver
+          import os
+          import sys
+
+          class Handler(http.server.SimpleHTTPRequestHandler):
+              def do_GET(self):
+                  if self.path == '/':
+                      self.send_response(200)
+                      self.end_headers()
+                      self.wfile.write(b"Hello from Ava :)")
+                  elif self.path == '/chaos':
+                      self.send_response(200)
+                      self.end_headers()
+                      self.wfile.write(b"Chaos enabled..\n")
+                      sys.stdout.write("chaos enabled..\n")
+                      sys.exit(1)
+                  else:
+                      self.send_response(404)
+                      self.end_headers()
+                      self.wfile.write(b"Not Found")
+
+          with socketserver.TCPServer(("", 8080), Handler) as httpd:
+              print("Serving on port 8080")
+              httpd.serve_forever()
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-server-service
+spec:
+  selector:
+    app: web-server
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: LoadBalancer

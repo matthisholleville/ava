@@ -1,0 +1,32 @@
+alertmanager:
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      receiver: "ava"
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+    receivers:
+      - name: "ava"
+        webhook_configs:
+          - url: "http://ava:8080/chat/webhook"
+
+server:
+  global:
+    scrape_interval: 15s
+    evaluation_interval: 5s
+
+serverFiles:
+  alerting_rules.yml:
+    groups:
+      - name: pod-alerts
+        rules:
+          - alert: PodCrashLoopBackOff
+            expr: kube_pod_container_status_restarts_total{namespace="default", app_kubernetes_io_instance="prometheus"} > 1
+            for: 0m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Pod in CrashLoopBackOff"
+              description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is in CrashLoopBackOff."

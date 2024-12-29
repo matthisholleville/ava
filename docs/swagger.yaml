@@ -1,0 +1,215 @@
+definitions:
+  api.Alert:
+    properties:
+      annotations:
+        additionalProperties:
+          type: string
+        type: object
+      endsAt:
+        type: string
+      fingerprint:
+        type: string
+      generatorURL:
+        type: string
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      startsAt:
+        type: string
+      status:
+        type: string
+    type: object
+  api.CreateNewChat:
+    properties:
+      backend:
+        example: openai
+        type: string
+      language:
+        example: en
+        type: string
+      message:
+        example: Pod web-server-5b866987d8-sxmtj in namespace default Crashlooping.
+        type: string
+    type: object
+  api.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  api.FetchMessagesResponse:
+    properties:
+      chat:
+        type: string
+      response:
+        type: string
+    type: object
+  api.SuccessResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  api.WebhookPayload:
+    properties:
+      alerts:
+        items:
+          $ref: '#/definitions/api.Alert'
+        type: array
+      commonAnnotations:
+        additionalProperties:
+          type: string
+        type: object
+      commonLabels:
+        additionalProperties:
+          type: string
+        type: object
+      externalURL:
+        type: string
+      groupKey:
+        type: string
+      groupLabels:
+        additionalProperties:
+          type: string
+        type: object
+      receiver:
+        type: string
+      status:
+        type: string
+      truncatedAlerts:
+        type: integer
+      version:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /chat:
+    post:
+      consumes:
+      - application/json
+      description: used to chat with Ava
+      parameters:
+      - description: Create a new chat
+        in: body
+        name: _
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateNewChat'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/api.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Chat with Ava
+      tags:
+      - Chat
+  /chat/{id}:
+    get:
+      consumes:
+      - application/json
+      description: used to chat with Ava
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.FetchMessagesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Chat with Ava
+      tags:
+      - Chat
+  /chat/webhook:
+    post:
+      consumes:
+      - application/json
+      description: used to chat with Ava from AlertManager Webhook
+      parameters:
+      - description: Webhook payload
+        in: body
+        name: _
+        required: true
+        schema:
+          $ref: '#/definitions/api.WebhookPayload'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/api.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Chat with Ava from AlertManager Webhook
+      tags:
+      - Chat
+  /live:
+    get:
+      consumes:
+      - application/json
+      description: used by Kubernetes liveness probe
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "503":
+          description: KO
+          schema:
+            type: string
+      summary: Liveness check
+      tags:
+      - Kubernetes
+  /readyz:
+    get:
+      consumes:
+      - application/json
+      description: used by Kubernetes readiness probe
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "503":
+          description: KO
+          schema:
+            type: string
+      summary: Readiness check
+      tags:
+      - Kubernetes
+swagger: "2.0"

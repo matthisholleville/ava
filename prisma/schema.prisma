@@ -1,0 +1,25 @@
+generator db {
+  provider = "go run github.com/steebchen/prisma-client-go"
+  output   = "../internal/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Chat {
+  id          Int       @id @default(autoincrement())
+  input       String
+  thread      Thread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  threadId    Int
+  response    String
+  createdAt   DateTime  @default(now())
+}
+
+model Thread {
+  id          Int       @id @default(autoincrement())
+  threadId    String    @unique
+  chats       Chat[]    
+  createdAt   DateTime  @default(now())
+}

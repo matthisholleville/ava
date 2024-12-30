@@ -144,6 +144,40 @@ paths:
       summary: Chat with Ava
       tags:
       - Chat
+    post:
+      consumes:
+      - application/json
+      description: used to respond to Ava
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Create a new chat
+        in: body
+        name: _
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateNewChat'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/api.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Chat with Ava
+      tags:
+      - Chat
   /chat/webhook:
     post:
       consumes:

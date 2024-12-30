@@ -94,6 +94,7 @@ func (s *Server) registerHandlers() {
 	chat.POST("", s.createChatHandler)
 	chat.POST("/webhook", s.alertManagerWebhookChatHandler)
 	chat.GET("/:id", s.fetchChatHandler)
+	chat.POST("/:id", s.respondChatHandler)
 }
 
 func (s *Server) registerMiddlewares() {

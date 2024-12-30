@@ -150,6 +150,14 @@ func (c *Chat) FetchChatMessages(threadID int) ([]db.ChatModel, error) {
 	).Take(DEFAULT_MAX_RESULTS).Exec(ctx)
 }
 
+func (c *Chat) GetThread(threadID int) (*db.ThreadModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_SQL_TIMEOUT)
+	defer cancel()
+	return c.db.Thread.FindUnique(
+		db.Thread.ID.Equals(threadID),
+	).Exec(ctx)
+}
+
 func (c *Chat) PersistThread(threadID string) (*db.ThreadModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_SQL_TIMEOUT)
 	defer cancel()

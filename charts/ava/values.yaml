@@ -28,7 +28,9 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-podAnnotations: {}
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8081"
 
 podSecurityContext: {}
   # fsGroup: 2000
@@ -80,6 +82,12 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+
+serviceMonitor:
+  enabled: false
+  additionalLabels:
+    release: "monitoring"
 
 postgresql:
   enabled: true

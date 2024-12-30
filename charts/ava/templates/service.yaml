@@ -11,5 +11,8 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    - name: metrics
+      port: 8081
+      targetPort: 8081
   selector:
     {{- include "ava.selectorLabels" . | nindent 4 }}

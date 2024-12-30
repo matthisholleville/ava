@@ -115,6 +115,7 @@ Run these commands:
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 helm install prometheus prometheus-community/prometheus --namespace monitoring --values ./docs/examples/custom-values.yaml --create-namespace
+helm install prometheus-operator-crds prometheus-community/prometheus-operator-crds --namespace monitoring
 ```
 
 **2. Create a secret with your OpenAI API Key**

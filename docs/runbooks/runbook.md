@@ -17,4 +17,4 @@ In case of a crashloop of one or more pods, this may impact the application's av
 3. Collect the logs of the pod.
 4. Delete the affected pod.
 5. Wait 30 seconds
-5. Check if http://198.19.249.2/ is avaiable
+5. Check if http://198.19.249.2/ is available

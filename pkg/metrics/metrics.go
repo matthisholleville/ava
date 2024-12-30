@@ -16,6 +16,18 @@ var (
 		},
 		[]string{"executor"},
 	)
+	ChatCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: fmt.Sprintf("%s_chat_counter", DEFAULT_NAMESPACE),
+			Help: "Number of times the chat has been called",
+		},
+		[]string{"status", "type"},
+	)
+
+	CustomCounterMetrics = []*prometheus.CounterVec{
+		ExecutorCounter,
+		ChatCounter,
+	}
 )
 
 type Metrics struct {
@@ -26,5 +38,10 @@ func NewMetrics() *Metrics {
 }
 
 func (m *Metrics) RegisterCustomMetrics() error {
-	return prometheus.DefaultRegisterer.Register(ExecutorCounter)
+	for _, metric := range CustomCounterMetrics {
+		if err := prometheus.DefaultRegisterer.Register(metric); err != nil {
+			return err
+		}
+	}
+	return nil
 }

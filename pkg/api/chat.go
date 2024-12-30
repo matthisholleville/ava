@@ -23,6 +23,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/matthisholleville/ava/pkg/chat"
+	"github.com/matthisholleville/ava/pkg/metrics"
 	"go.uber.org/zap"
 )
 
@@ -122,12 +123,15 @@ func (s *Server) alertManagerWebhookChatHandler(echo echo.Context) error {
 		}
 
 		go func() {
+			chatType := "webhook"
 			response, err := chat.Chat(message, threadID)
 			if err != nil {
+				metrics.ChatCounter.WithLabelValues("error", chatType).Inc()
 				s.logger.Error(err.Error())
 				return
 			}
 			s.logger.Info("Chat response processed successfully")
+			metrics.ChatCounter.WithLabelValues("success", chatType).Inc()
 			if chat.Persist {
 				s.logger.Debug("Persisting chat")
 				_, err := chat.PersistChat(message, response, threadID)
@@ -198,12 +202,15 @@ func (s *Server) createChatHandler(echo echo.Context) error {
 	}
 
 	go func() {
+		chatType := "chat"
 		response, err := chat.Chat(data.Message, threadID)
 		if err != nil {
+			metrics.ChatCounter.WithLabelValues("error", chatType).Inc()
 			s.logger.Error(err.Error())
 			return
 		}
 		s.logger.Info("Chat response processed successfully")
+		metrics.ChatCounter.WithLabelValues("success", chatType).Inc()
 		if chat.Persist {
 			s.logger.Debug("Persisting chat")
 			_, err := chat.PersistChat(data.Message, response, threadID)
@@ -328,12 +335,15 @@ func (s *Server) respondChatHandler(echo echo.Context) error {
 	}
 
 	go func() {
+		chatType := "response"
 		response, err := chat.Chat(data.Message, dbThread.ThreadID)
 		if err != nil {
+			metrics.ChatCounter.WithLabelValues("error", chatType).Inc()
 			s.logger.Error(err.Error())
 			return
 		}
 		s.logger.Info("Chat response processed successfully")
+		metrics.ChatCounter.WithLabelValues("success", chatType).Inc()
 		if chat.Persist {
 			s.logger.Debug("Persisting chat")
 			_, err := chat.PersistChat(data.Message, response, dbThread.ThreadID)

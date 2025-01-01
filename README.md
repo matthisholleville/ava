@@ -41,6 +41,7 @@ To achieve this, I’ve built Ava using an REAct AI model powered by OpenAI Assi
 - Automates fixing one or more alerts using your runbooks and executors (functions).
 - Works with Alert Manager webhooks.
 - Compatible with OpenAI.
+- Add an interactive mode to let Ava recheck if the issue is fixed after some time.
 - More features coming soon... check the roadmap below.
 
 [Watch the Ava demo on YouTube](https://youtu.be/VDAJqaBEv-s)
@@ -162,7 +163,6 @@ This will trigger chaos in the webserver. Ava should detect the issue and fix it
 ## Roadmap
 
 - Connect Ava to Slack (or other platforms) to update alert statuses in a channel.
-- Add an interactive mode to let Ava recheck if the issue is fixed after some time.
 - Create new executors for Kubernetes, databases (e.g., killing a PID), Prometheus, and Grafana (e.g., getting dashboard screenshots).
 - Allow importing knowledge bases from other sources (e.g., Backstage, Notion).
 - Support other AI backends (e.g., Llama, Gemini).

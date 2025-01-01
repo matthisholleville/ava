@@ -15,6 +15,7 @@
 package chat
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/matthisholleville/ava/pkg/chat"
@@ -29,6 +30,7 @@ var (
 	kubecontext string
 	kubeconfig  string
 	message     string
+	thread      string
 )
 
 var ChatCmd = &cobra.Command{
@@ -51,17 +53,20 @@ var ChatCmd = &cobra.Command{
 			logger.Fatal(err.Error())
 		}
 
-		threadID, _, err := chat.InitChat()
-		if err != nil {
-			logger.Fatal(err.Error())
+		if thread == "" {
+			thread, _, err = chat.InitChat()
+			if err != nil {
+				logger.Fatal(err.Error())
+			}
 		}
 
-		response, err := chat.Chat(message, threadID)
+		response, err := chat.Chat(message, thread)
 		if err != nil {
 			logger.Fatal(err.Error())
 		}
 
 		logger.Info(response)
+		logger.Info(fmt.Sprintf("If you want to continue the conversation, use the --thread flag with the following value: %s", thread))
 
 	},
 }
@@ -72,4 +77,5 @@ func init() {
 	ChatCmd.Flags().StringVarP(&backend, "backend", "b", "openai", "Backend AI provider")
 	ChatCmd.Flags().StringVar(&kubecontext, "kubecontext", "", "Kubernetes context to use. Only required if out-of-cluster.")
 	ChatCmd.Flags().StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
+	ChatCmd.Flags().StringVar(&thread, "thread", "", "Thread ID to use. Only required if you want to continue a conversation.")
 }

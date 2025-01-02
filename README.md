@@ -231,7 +231,7 @@ Once launched, you can access the Swagger documentation at the following URL: [h
 
 ## Contributing
 
-Coming soon...
+Please read our [contributing guide](./CONTRIBUTING.md).
 
 ## License
 

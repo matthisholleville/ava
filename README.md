@@ -40,6 +40,7 @@ To achieve this, I’ve built Ava using an REAct AI model powered by OpenAI Assi
 - Speeds up resolution by following your runbooks.
 - Automates fixing one or more alerts using your runbooks and executors (functions).
 - Works with Alert Manager webhooks.
+- REST API.
 - Compatible with OpenAI.
 - Add an interactive mode to let Ava recheck if the issue is fixed after some time.
 - Allow importing knowledge bases from local path & Github.
@@ -185,12 +186,48 @@ This will trigger chaos in the webserver. Ava should detect the issue and fix it
 
 </details>
 
+## Serve Mode
+
+Ava provides an REST API. The CLI mode and SERVER mode offer the same features, with one key difference: the API mode requires a PostgreSQL database to function.
+
+The API stores chat results, threads, and other information in the database, which can be particularly useful for auditing purposes.
+
+### Running the Server Mode
+
+<details>
+
+<summary>Steps to Launch Server Mode</summary>
+
+**Before starting the server mode, you need a PostgreSQL database up and running.** You can use Docker or a cloud solution like CloudSQL.
+
+1. Rename `.envrc-sample` to `.envrc`.
+2. Update the environment variable `export DATABASE_URL="CHANGE_ME"` with a valid connection string.
+3. Export the variables: `direnv allow`.
+4. Initialize the PostgreSQL schema: 
+    ```bash
+    go run github.com/steebchen/prisma-client-go db push
+    ```
+5. Generate the Swagger documentation: 
+    ```bash
+    make swagger
+    ```
+6. Start the server mode: 
+    ```bash
+    go run main.go serve
+    ```
+
+Once launched, you can access the Swagger documentation at the following URL: [http://localhost:8080/swagger/index.html#](http://localhost:8080/swagger/index.html#).
+
+</details>
+
+
 ## Roadmap
 
 - Connect Ava to Slack (or other platforms) to update alert statuses in a channel.
 - Create new executors for Kubernetes, databases (e.g., killing a PID), Prometheus, and Grafana (e.g., getting dashboard screenshots).
 - Allow importing knowledge bases from other sources (e.g., Backstage, Notion).
 - Support other AI backends (e.g., Llama, Gemini).
+- Automatic PostMortem Generation.
 
 ## Contributing
 

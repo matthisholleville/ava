@@ -32,6 +32,27 @@ definitions:
         example: Pod web-server-5b866987d8-sxmtj in namespace default Crashlooping.
         type: string
     type: object
+  api.CreateNewKnowledge:
+    properties:
+      backend:
+        example: openai
+        type: string
+      gitAuthToken:
+        example: ""
+        type: string
+      gitBranch:
+        example: ""
+        type: string
+      gitRepositoryURL:
+        example: ""
+        type: string
+      path:
+        example: ./docs/runbooks
+        type: string
+      source:
+        example: local
+        type: string
+    type: object
   api.ErrorResponse:
     properties:
       code:
@@ -44,6 +65,12 @@ definitions:
       chat:
         type: string
       response:
+        type: string
+    type: object
+  api.PurgeKnowledge:
+    properties:
+      backend:
+        example: openai
         type: string
     type: object
   api.SuccessResponse:
@@ -208,6 +235,65 @@ paths:
       summary: Chat with Ava from AlertManager Webhook
       tags:
       - Chat
+  /knowledge:
+    delete:
+      consumes:
+      - application/json
+      description: used to purge Ava's knowledge base
+      parameters:
+      - description: PurgeKnowledge payload
+        in: body
+        name: _
+        required: true
+        schema:
+          $ref: '#/definitions/api.PurgeKnowledge'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/api.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Purge Ava's knowledge base
+      tags:
+      - Knowledge
+    post:
+      consumes:
+      - application/json
+      description: used to add knowledge to Ava
+      parameters:
+      - description: CreateNewKnowledge payload
+        in: body
+        name: _
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateNewKnowledge'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/api.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Add knowledge to Ava
+      tags:
+      - Knowledge
   /live:
     get:
       consumes:

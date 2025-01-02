@@ -95,6 +95,10 @@ func (s *Server) registerHandlers() {
 	chat.POST("/webhook", s.alertManagerWebhookChatHandler)
 	chat.GET("/:id", s.fetchChatHandler)
 	chat.POST("/:id", s.respondChatHandler)
+
+	knowledge := s.router.Group("/knowledge")
+	knowledge.POST("", s.addKnowledgeHandler)
+	knowledge.DELETE("", s.purgeKnowledgeHandler)
 }
 
 func (s *Server) registerMiddlewares() {

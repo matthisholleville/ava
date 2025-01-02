@@ -202,6 +202,96 @@ const docTemplate = `{
                 }
             }
         },
+        "/knowledge": {
+            "post": {
+                "description": "used to add knowledge to Ava",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Knowledge"
+                ],
+                "summary": "Add knowledge to Ava",
+                "parameters": [
+                    {
+                        "description": "CreateNewKnowledge payload",
+                        "name": "_",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateNewKnowledge"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/api.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "used to purge Ava's knowledge base",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Knowledge"
+                ],
+                "summary": "Purge Ava's knowledge base",
+                "parameters": [
+                    {
+                        "description": "PurgeKnowledge payload",
+                        "name": "_",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.PurgeKnowledge"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/api.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/live": {
             "get": {
                 "description": "used by Kubernetes liveness probe",
@@ -311,6 +401,35 @@ const docTemplate = `{
                 }
             }
         },
+        "api.CreateNewKnowledge": {
+            "type": "object",
+            "properties": {
+                "backend": {
+                    "type": "string",
+                    "example": "openai"
+                },
+                "gitAuthToken": {
+                    "type": "string",
+                    "example": ""
+                },
+                "gitBranch": {
+                    "type": "string",
+                    "example": ""
+                },
+                "gitRepositoryURL": {
+                    "type": "string",
+                    "example": ""
+                },
+                "path": {
+                    "type": "string",
+                    "example": "./docs/runbooks"
+                },
+                "source": {
+                    "type": "string",
+                    "example": "local"
+                }
+            }
+        },
         "api.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -330,6 +449,15 @@ const docTemplate = `{
                 },
                 "response": {
                     "type": "string"
+                }
+            }
+        },
+        "api.PurgeKnowledge": {
+            "type": "object",
+            "properties": {
+                "backend": {
+                    "type": "string",
+                    "example": "openai"
                 }
             }
         },

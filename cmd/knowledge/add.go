@@ -45,7 +45,7 @@ var addCmd = &cobra.Command{
 	Long:  `Add a new document to Ava's knowledge base.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := viper.Get("logger").(logger.ILogger)
-		logger.Info("Adding a new document to Ava's knowledge base")
+		logger.Info("Adding a new documents to Ava's knowledge base")
 		backendKnowledge, err := backendKnowledge.NewBackendKnowledge(backendKnowledge.KnowledgeConfiguration{
 			ActiveProvider: "openai",
 			OpenAI: openai.Configuration{
@@ -78,6 +78,8 @@ var addCmd = &cobra.Command{
 			logger.Fatal(err.Error())
 		}
 
+		defer sourceKnowledge.CleanUp()
+
 		logger.Info("Getting files")
 		files, err := sourceKnowledge.GetFiles()
 		if err != nil {
@@ -90,12 +92,6 @@ var addCmd = &cobra.Command{
 		err = backendKnowledge.UploadFiles(files)
 		if err != nil {
 			logger.Fatal(err.Error())
-		}
-
-		logger.Info("Cleaning up")
-		err = sourceKnowledge.CleanUp()
-		if err != nil {
-			logger.Warn(fmt.Sprintf("Error cleaning up: %s", err.Error()))
 		}
 
 	},

@@ -17,11 +17,26 @@ package logger
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/matthisholleville/ava/pkg/logger/json"
 	"github.com/matthisholleville/ava/pkg/logger/raw"
 	"go.uber.org/zap"
 )
+
+type LoggerWriter struct {
+	Logger func(msg string, fields ...zap.Field)
+}
+
+func (lw *LoggerWriter) Write(p []byte) (n int, err error) {
+	lines := strings.Split(string(p), "\n")
+	for _, line := range lines {
+		if line != "" {
+			lw.Logger(line)
+		}
+	}
+	return len(p), nil
+}
 
 type ILogger interface {
 	Init(logLevel string) error

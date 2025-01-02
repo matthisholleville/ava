@@ -15,11 +15,13 @@
 package knowledge
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/matthisholleville/ava/pkg/ai/openai"
 	backendKnowledge "github.com/matthisholleville/ava/pkg/knowledge/backend"
 	sourceKnowledge "github.com/matthisholleville/ava/pkg/knowledge/source"
+	"github.com/matthisholleville/ava/pkg/knowledge/source/configuration"
 	"github.com/matthisholleville/ava/pkg/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -29,6 +31,12 @@ const (
 	defaultBackend    = "openai"
 	defaultSourcePath = "./docs/runbooks"
 	defaultSource     = "local"
+)
+
+var (
+	gitAuthToken     string
+	gitRepositoryURL string
+	gitBranch        string
 )
 
 var addCmd = &cobra.Command{
@@ -60,19 +68,36 @@ var addCmd = &cobra.Command{
 		}
 
 		logger.Info("Configuring source knowledge")
-		sourceKnowledge.Configure(logger)
-
-		logger.Info("Getting files")
-		files, err := sourceKnowledge.GetFiles(path)
+		err = sourceKnowledge.Configure(logger, configuration.KnowledgeSourceConfiguration{
+			Directory:        path,
+			GitRepositoryURL: gitRepositoryURL,
+			GitAuthToken:     gitAuthToken,
+			GitBranch:        gitBranch,
+		})
 		if err != nil {
 			logger.Fatal(err.Error())
 		}
+
+		logger.Info("Getting files")
+		files, err := sourceKnowledge.GetFiles()
+		if err != nil {
+			logger.Fatal(err.Error())
+		}
+
+		logger.Info(fmt.Sprintf("Found %d files", len(files)))
 
 		logger.Info("Uploading file")
 		err = backendKnowledge.UploadFiles(files)
 		if err != nil {
 			logger.Fatal(err.Error())
 		}
+
+		logger.Info("Cleaning up")
+		err = sourceKnowledge.CleanUp()
+		if err != nil {
+			logger.Warn(fmt.Sprintf("Error cleaning up: %s", err.Error()))
+		}
+
 	},
 }
 
@@ -80,4 +105,7 @@ func init() {
 	addCmd.Flags().StringVarP(&backend, "backend", "b", defaultBackend, "Backend AI provider")
 	addCmd.Flags().StringVarP(&path, "path", "p", defaultSourcePath, "Path to the document to add")
 	addCmd.Flags().StringVarP(&source, "source", "s", defaultSource, "Source of the document")
+	addCmd.Flags().StringVarP(&gitAuthToken, "git-auth-token", "t", "", "Git auth token")
+	addCmd.Flags().StringVarP(&gitRepositoryURL, "git-repository-url", "r", "", "Git repository URL")
+	addCmd.Flags().StringVarP(&gitBranch, "git-branch", "n", "", "Git branch")
 }

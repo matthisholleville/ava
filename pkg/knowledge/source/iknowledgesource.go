@@ -17,14 +17,17 @@ package knowledge
 import (
 	"fmt"
 
+	"github.com/matthisholleville/ava/pkg/knowledge/source/configuration"
+	"github.com/matthisholleville/ava/pkg/knowledge/source/git"
 	"github.com/matthisholleville/ava/pkg/knowledge/source/local"
 	"github.com/matthisholleville/ava/pkg/logger"
 )
 
 type IKnowledgeSource interface {
-	Configure(logger logger.ILogger) error
+	Configure(logger logger.ILogger, config configuration.KnowledgeSourceConfiguration) error
 	GetName() string
-	GetFiles(dir string) ([]string, error)
+	GetFiles() ([]string, error)
+	CleanUp() error
 }
 
 func NewSourceKnowledge(provider string) (IKnowledgeSource, error) {
@@ -33,6 +36,8 @@ func NewSourceKnowledge(provider string) (IKnowledgeSource, error) {
 	switch provider {
 	case "local":
 		knowledge = &local.Local{}
+	case "git":
+		knowledge = &git.Git{}
 	default:
 		return nil, fmt.Errorf("provider %s not found", provider)
 	}

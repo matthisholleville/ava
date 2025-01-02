@@ -42,6 +42,7 @@ To achieve this, I’ve built Ava using an REAct AI model powered by OpenAI Assi
 - Works with Alert Manager webhooks.
 - Compatible with OpenAI.
 - Add an interactive mode to let Ava recheck if the issue is fixed after some time.
+- Allow importing knowledge bases from local path & Github.
 - More features coming soon... check the roadmap below.
 
 [Watch the Ava demo on YouTube](https://youtu.be/VDAJqaBEv-s)
@@ -74,6 +75,30 @@ To achieve this, I’ve built Ava using an REAct AI model powered by OpenAI Assi
     ```bash
     ./ava chat -m "Pod $CHANGE_ME in namespace default Crashlooping."
     ```
+
+## Knowledge
+
+The runbook knowledge base is one of the most important parts of Ava. It allows Ava to understand problems, guide you to mitigate or fix them, and even fix them automatically using executors. 
+
+Your runbooks are uploaded into an OpenAI vector store and utilized by Ava during chats with the model. [Learn more here](https://platform.openai.com/docs/assistants/tools/file-search).
+
+You can currently import this knowledge base from:
+- `local`
+- `git` (Tested with private GitHub repositories using an authentication token)
+
+More sources will be added soon (see the roadmap section below).
+
+### Examples
+
+<details>
+
+<summary>Using Github private repository & auth token</summary>
+
+```bash
+ava knowledge add -s git -r https://github.com/MyPrivateOrg/my-private-repository.git -t "ghp_dflkjcIO..."
+```
+
+</details>
 
 ## Executors
 

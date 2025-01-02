@@ -19,22 +19,33 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/matthisholleville/ava/pkg/knowledge/source/configuration"
 	"github.com/matthisholleville/ava/pkg/logger"
 )
 
 type Local struct {
-	logger logger.ILogger
+	logger    logger.ILogger
+	directory string
 }
 
-func (l *Local) Configure(logger logger.ILogger) error {
+func (l *Local) Configure(logger logger.ILogger, config configuration.KnowledgeSourceConfiguration) error {
 	l.logger = logger
+	l.directory = config.Directory
 	return nil
 }
 
-func (l *Local) GetFiles(dir string) ([]string, error) {
-	var files []string
+func (l *Local) GetFiles() ([]string, error) {
 
-	l.logger.Debug(fmt.Sprintf("Downloading files from %s", dir))
+	l.logger.Debug(fmt.Sprintf("Downloading files from %s", l.directory))
+
+	files, err := l.GetFilesFromLocalPath(l.directory)
+
+	return files, err
+}
+
+func (l *Local) GetFilesFromLocalPath(dir string) ([]string, error) {
+	var files []string
+	l.logger.Debug(fmt.Sprintf("Reading files from %s", dir))
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -46,6 +57,10 @@ func (l *Local) GetFiles(dir string) ([]string, error) {
 	})
 
 	return files, err
+}
+
+func (l *Local) CleanUp() error {
+	return nil
 }
 
 func (l *Local) GetName() string {

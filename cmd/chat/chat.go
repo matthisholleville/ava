@@ -25,12 +25,13 @@ import (
 )
 
 var (
-	language    string
-	backend     string
-	kubecontext string
-	kubeconfig  string
-	message     string
-	thread      string
+	language        string
+	backend         string
+	kubecontext     string
+	kubeconfig      string
+	message         string
+	thread          string
+	enableExecutors bool
 )
 
 var ChatCmd = &cobra.Command{
@@ -47,7 +48,7 @@ var ChatCmd = &cobra.Command{
 			os.Getenv("OPENAI_API_KEY"),
 			logger,
 			chat.WithLanguage(language),
-			chat.WithConfigureAssistant(logger),
+			chat.WithConfigureAssistant(logger, enableExecutors),
 		)
 		if err != nil {
 			logger.Fatal(err.Error())
@@ -78,4 +79,5 @@ func init() {
 	ChatCmd.Flags().StringVar(&kubecontext, "kubecontext", "", "Kubernetes context to use. Only required if out-of-cluster.")
 	ChatCmd.Flags().StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	ChatCmd.Flags().StringVar(&thread, "thread", "", "Thread ID to use. Only required if you want to continue a conversation.")
+	ChatCmd.Flags().BoolVar(&enableExecutors, "enable-executors", false, "Enable executors")
 }

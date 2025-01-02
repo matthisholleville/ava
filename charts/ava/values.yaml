@@ -89,6 +89,10 @@ serviceMonitor:
   additionalLabels:
     release: "monitoring"
 
+env:
+  - name: ENABLE_EXECUTORS_ON_WEBHOOK
+    value: "false"
+
 postgresql:
   enabled: true
   auth:

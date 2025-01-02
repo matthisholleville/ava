@@ -37,8 +37,8 @@ To achieve this, I’ve built Ava using an REAct AI model powered by OpenAI Assi
 
 ## Features
 
-- Speeds up resolution by following your runbooks.
-- Automates fixing one or more alerts using your runbooks and executors (functions).
+- Speeds up resolution by following your runbooks and provides useful assistance to resolve the problem.
+- **Optionally** Automates fixing one or more alerts using your runbooks and executors (functions).
 - Works with Alert Manager webhooks.
 - REST API.
 - Compatible with OpenAI.
@@ -101,24 +101,81 @@ ava knowledge add -s git -r https://github.com/MyPrivateOrg/my-private-repositor
 
 </details>
 
-## Executors
+## Analysis Mode
+
+In its default version, A.V.A greatly accelerates the resolution phase by providing assistance for a problem based on the runbooks you’ve uploaded into its knowledge base. This ensures that, regardless of the user handling the issue, they don’t need to locate the right runbook, connect to the correct tool, etc. Additionally, if the problem isn’t covered by a runbook, Ava can leverage the AI model’s knowledge base to guide the user.
+
+## Automatic Fix Mode
+
+**Warning: This mode is experimental and takes actions (see the Executors section below) on the environment where A.V.A is deployed.**
+
+This optional mode allows A.V.A to attempt to fix the problem automatically using its list of available Executors. This mode enables rapid mitigation of issues, reducing stress and mental load for the operator in charge of fixing the problem. It allows the operator to focus on problem-solving while minimizing the chances of human error and avoiding repetitive tasks.
+
+### How to enable automatic fix mode
+
+<details>
+
+<summary>CLI</summary>
+
+Use the flag `--enable-executors=true`
+
+Example :
+
+```bash
+go run main.go chat -m "Pod web-server-5b866987d8-4nhsg in namespace default Crashlooping." --enable-executors=true
+```
+
+</details>
+
+<details>
+
+<summary>API</summary>
+
+You are free to enable or disable executors in the body of the requests.
+
+Example : 
+
+```bash
+curl -X POST https://your-url/chat \
+-H "Content-Type: application/json" \
+-d '{
+  "backend": "openai",
+  "enableExecutors": true,
+  "language": "en",
+  "message": "Pod web-server-5b866987d8-sxmtj in namespace default Crashlooping."
+}'
+```
+
+----------
+
+For reacting to AlertManager webhooks, you simply need to specify the environment variable `ENABLE_EXECUTORS_ON_WEBHOOK`.
+
+Example :
+
+```bash
+export ENABLE_EXECUTORS_ON_WEBHOOK="true"
+```
+
+</details>
+
+### Executors
 
 Executors are functions Ava can use to act on your system. OpenAI does not perform actions directly; Ava executes them locally and sends the results back for better context. [Learn more about OpenAI assistant functions](https://platform.openai.com/docs/assistants/tools/function-calling).
 
-### Built-in Executors
+#### Built-in Executors
 
-#### Kubernetes
+##### Kubernetes
 
 - `deletePod`: Deletes a pod.
 - `getPod`: Gets pod details.
 - `listPod`: Lists pods in a namespace.
 - `logsPod`: Shows the last 100 lines of pod logs.
 
-#### Common
+##### Common
 
 - `wait`: Waits before the next action.
 
-#### Web
+##### Web
 
 - `getUrl`: Makes a `GET` request to a URL and returns status and timing.
 

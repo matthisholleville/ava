@@ -29,10 +29,17 @@ response, before fully answering the question to the best of your ability.
 `
 
 var (
-	ANALYSE_PROMPT = `
+	ANALYSE_AND_FIX_PROMPT = `
 	Using the provided runbooks, follow the outlined steps to execute the necessary functions and resolve the issue.
 	You must respond to the user in %s with a detailed explanation of the steps that allowed you to understand and fix the problem.
 
 	The problem: %s
 	`
+
+	ANALYSE_PROMPT = `
+	Using the provided runbooks, help the user understand the problem and provide a detailed explanation of the steps he can follow to fix the problem.
+
+	You must respond to the user in %s.
+	
+	The problem: %s`
 )

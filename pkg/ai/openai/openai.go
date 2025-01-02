@@ -32,10 +32,11 @@ import (
 const openaiClientName = "openai"
 
 type OpenAIClient struct {
-	client        *openai.Client
-	Configuration Configuration
-	ctx           context.Context
-	logger        logger.ILogger
+	client          *openai.Client
+	Configuration   Configuration
+	ctx             context.Context
+	logger          logger.ILogger
+	enableExecutors bool
 }
 
 type Configuration struct {
@@ -71,12 +72,22 @@ func (c *OpenAIClient) getVectorStore() error {
 	return fmt.Errorf("vector store not found")
 }
 
+func (c *OpenAIClient) getPrompt(language, text string) string {
+
+	if c.enableExecutors {
+		return fmt.Sprintf(types.ANALYSE_AND_FIX_PROMPT, language, text)
+	}
+
+	return fmt.Sprintf(types.ANALYSE_PROMPT, language, text)
+
+}
+
 func (c *OpenAIClient) Analyze(text, language string, threadID string, executorConfig common.Executor) (string, error) {
 	var response string
 
 	c.logger.Info(fmt.Sprintf("Analyzing the message: %s", text))
 
-	inputMessage := fmt.Sprintf(types.ANALYSE_PROMPT, language, text)
+	inputMessage := c.getPrompt(language, text)
 
 	c.logger.Debug("Creating a message")
 	_, err := c.createMessage(threadID, inputMessage)
@@ -226,7 +237,7 @@ func (c *OpenAIClient) ConfigureKnowledge(logger logger.ILogger) error {
 	return nil
 }
 
-func (c *OpenAIClient) ConfigureAssistant(logger logger.ILogger) error {
+func (c *OpenAIClient) ConfigureAssistant(logger logger.ILogger, enableExecutors bool) error {
 	err := c.Configure(logger)
 	if err != nil {
 		return err
@@ -270,7 +281,13 @@ func (c *OpenAIClient) ConfigureAssistant(logger logger.ILogger) error {
 			Type: openai.AssistantToolTypeFileSearch,
 		},
 	}
-	tools = append(tools, Functions...)
+
+	if enableExecutors {
+		c.logger.Debug("Adding the executors to the assistant")
+		tools = append(tools, Functions...)
+	}
+	c.enableExecutors = enableExecutors
+
 	c.logger.Debug("Modifying the assistant")
 	_, err = c.client.ModifyAssistant(c.ctx, c.Configuration.AssistantID, openai.AssistantRequest{
 		Instructions: &assistantInstructions,

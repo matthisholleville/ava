@@ -29,9 +29,10 @@ import (
 
 // CreateNewChat  Create program.
 type CreateNewChat struct {
-	Message  string `json:"message" example:"Pod web-server-5b866987d8-sxmtj in namespace default Crashlooping."`
-	Language string `json:"language,omitempty" example:"en"`
-	Backend  string `json:"backend,omitempty" example:"openai"`
+	Message         string `json:"message" example:"Pod web-server-5b866987d8-sxmtj in namespace default Crashlooping."`
+	Language        string `json:"language,omitempty" example:"en"`
+	Backend         string `json:"backend,omitempty" example:"openai"`
+	EnableExecutors bool   `json:"enableExecutors,omitempty" example:"true"`
 }
 
 type Alert struct {
@@ -85,6 +86,8 @@ func (s *Server) alertManagerWebhookChatHandler(echo echo.Context) error {
 		return s.JSONResponseWithCode(echo, "no alerts to process", http.StatusCreated)
 	}
 
+	// Check if executors are enabled and set default value to false
+	isExecutorsEnabled := os.Getenv("ENABLE_EXECUTORS_ON_WEBHOOK") == "true"
 	chat, err := chat.NewChat(
 		"openai",
 		os.Getenv("OPENAI_API_KEY"),
@@ -92,7 +95,7 @@ func (s *Server) alertManagerWebhookChatHandler(echo echo.Context) error {
 		chat.WithLanguage("en"),
 		chat.WithDbClient(s.db),
 		chat.WithPersist(true),
-		chat.WithConfigureAssistant(s.logger),
+		chat.WithConfigureAssistant(s.logger, isExecutorsEnabled),
 	)
 	if err != nil {
 		s.logger.Fatal(err.Error())
@@ -186,7 +189,7 @@ func (s *Server) createChatHandler(echo echo.Context) error {
 		chat.WithLanguage(data.Language),
 		chat.WithDbClient(s.db),
 		chat.WithPersist(true),
-		chat.WithConfigureAssistant(s.logger),
+		chat.WithConfigureAssistant(s.logger, data.EnableExecutors),
 	)
 	if err != nil {
 		s.logger.Fatal(err.Error())
@@ -321,7 +324,7 @@ func (s *Server) respondChatHandler(echo echo.Context) error {
 		chat.WithLanguage("en"),
 		chat.WithDbClient(s.db),
 		chat.WithPersist(true),
-		chat.WithConfigureAssistant(s.logger),
+		chat.WithConfigureAssistant(s.logger, data.EnableExecutors),
 	)
 	if err != nil {
 		s.logger.Fatal(err.Error())

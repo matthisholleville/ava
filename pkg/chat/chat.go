@@ -67,9 +67,9 @@ func WithPersist(persist bool) Option {
 	}
 }
 
-func WithConfigureAssistant(logger logger.ILogger) Option {
+func WithConfigureAssistant(logger logger.ILogger, enableExecutors bool) Option {
 	return func(i *Chat) {
-		err := i.AIClient.ConfigureAssistant(logger)
+		err := i.AIClient.ConfigureAssistant(logger, enableExecutors)
 		if err != nil {
 			i.logger.Fatal(err.Error())
 		}

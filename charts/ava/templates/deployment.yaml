@@ -66,6 +66,9 @@ spec:
               valueFrom:
                 resourceFieldRef:
                   resource: limits.memory
+            {{- with .Values.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

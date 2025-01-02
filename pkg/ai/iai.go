@@ -33,7 +33,7 @@ func WithPassword(password string) Option {
 type IAI interface {
 	Configure(logger logger.ILogger) error
 	ConfigureKnowledge(logger logger.ILogger) error
-	ConfigureAssistant(logger logger.ILogger) error
+	ConfigureAssistant(logger logger.ILogger, enableExecutors bool) error
 	Purge() error
 	UploadFiles(path []string) error
 	GetName() string

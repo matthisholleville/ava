@@ -391,6 +391,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "openai"
                 },
+                "enableExecutors": {
+                    "type": "boolean",
+                    "example": true
+                },
                 "language": {
                     "type": "string",
                     "example": "en"

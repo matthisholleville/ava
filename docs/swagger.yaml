@@ -25,6 +25,9 @@ definitions:
       backend:
         example: openai
         type: string
+      enableExecutors:
+        example: true
+        type: boolean
       language:
         example: en
         type: string

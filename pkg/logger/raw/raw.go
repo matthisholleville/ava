@@ -15,36 +15,76 @@
 package raw
 
 import (
+	"errors"
 	"os"
 
 	"github.com/fatih/color"
 	"go.uber.org/zap"
 )
 
+type LogLevel int
+
+const (
+	DebugLevel LogLevel = iota
+	InfoLevel
+	WarnLevel
+	ErrorLevel
+	FatalLevel
+)
+
 type Raw struct {
+	logLevel LogLevel
+}
+
+func (r *Raw) shouldLog(level LogLevel) bool {
+	return level >= r.logLevel
 }
 
 func (r *Raw) Info(msg string, fields ...zap.Field) {
-	color.Green(msg)
+	if r.shouldLog(InfoLevel) {
+		color.Green(msg)
+	}
 }
 
 func (r *Raw) Debug(msg string, fields ...zap.Field) {
-	color.Cyan(msg)
+	if r.shouldLog(DebugLevel) {
+		color.Cyan(msg)
+	}
 }
 
 func (r *Raw) Warn(msg string, fields ...zap.Field) {
-	color.Yellow(msg)
+	if r.shouldLog(WarnLevel) {
+		color.Yellow(msg)
+	}
 }
 
 func (r *Raw) Error(msg string, fields ...zap.Field) {
-	color.Red(msg)
+	if r.shouldLog(ErrorLevel) {
+		color.Red(msg)
+	}
 }
 
 func (r *Raw) Fatal(msg string, fields ...zap.Field) {
-	color.Red(msg)
-	os.Exit(1)
+	if r.shouldLog(FatalLevel) {
+		color.Red(msg)
+		os.Exit(1)
+	}
 }
 
 func (r *Raw) Init(logLevel string) error {
+	switch logLevel {
+	case "debug":
+		r.logLevel = DebugLevel
+	case "info":
+		r.logLevel = InfoLevel
+	case "warn":
+		r.logLevel = WarnLevel
+	case "error":
+		r.logLevel = ErrorLevel
+	case "fatal":
+		r.logLevel = FatalLevel
+	default:
+		return errors.New("invalid log level")
+	}
 	return nil
 }

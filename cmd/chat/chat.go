@@ -55,7 +55,7 @@ var ChatCmd = &cobra.Command{
 		}
 
 		if thread == "" {
-			thread, _, err = chat.InitChat()
+			thread, err = chat.InitChat()
 			if err != nil {
 				logger.Fatal(err.Error())
 			}

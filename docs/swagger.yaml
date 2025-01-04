@@ -112,6 +112,131 @@ definitions:
       version:
         type: string
     type: object
+  slack.ReceiveSlackEvent:
+    properties:
+      api_app_id:
+        type: string
+      authorizations:
+        items:
+          $ref: '#/definitions/slack.SlackAuthorization'
+        type: array
+      challenge:
+        type: string
+      context_enterprise_id:
+        type: string
+      context_team_id:
+        type: string
+      event:
+        $ref: '#/definitions/slack.SlackEvent'
+      event_context:
+        type: string
+      event_id:
+        type: string
+      event_time:
+        type: integer
+      is_ext_shared_channel:
+        type: boolean
+      team_id:
+        type: string
+      token:
+        type: string
+      type:
+        type: string
+    type: object
+  slack.SlackAttachment:
+    properties:
+      color:
+        type: string
+      fallback:
+        type: string
+      id:
+        type: integer
+      mrkdwn_in:
+        items:
+          type: string
+        type: array
+      text:
+        type: string
+      title:
+        type: string
+      title_link:
+        type: string
+    type: object
+  slack.SlackAuthorization:
+    properties:
+      enterprise_id:
+        type: string
+      is_bot:
+        type: boolean
+      is_enterprise_install:
+        type: boolean
+      team_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  slack.SlackBlock:
+    properties:
+      block_id:
+        type: string
+      elements:
+        items:
+          $ref: '#/definitions/slack.SlackBlockSection'
+        type: array
+      type:
+        type: string
+    type: object
+  slack.SlackBlockElement:
+    properties:
+      text:
+        type: string
+      type:
+        type: string
+    type: object
+  slack.SlackBlockSection:
+    properties:
+      elements:
+        items:
+          $ref: '#/definitions/slack.SlackBlockElement'
+        type: array
+      type:
+        type: string
+    type: object
+  slack.SlackEvent:
+    properties:
+      attachments:
+        items:
+          $ref: '#/definitions/slack.SlackAttachment'
+        type: array
+      blocks:
+        items:
+          $ref: '#/definitions/slack.SlackBlock'
+        type: array
+      bot_id:
+        type: string
+      channel:
+        type: string
+      channel_type:
+        type: string
+      client_msg_id:
+        type: string
+      event_ts:
+        type: string
+      subtype:
+        type: string
+      team:
+        type: string
+      text:
+        type: string
+      thread_ts:
+        type: string
+      ts:
+        type: string
+      type:
+        type: string
+      user:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -236,6 +361,36 @@ paths:
           schema:
             $ref: '#/definitions/api.ErrorResponse'
       summary: Chat with Ava from AlertManager Webhook
+      tags:
+      - Chat
+  /event/slack:
+    post:
+      consumes:
+      - application/json
+      description: used to chat with Ava when a slack event is received
+      parameters:
+      - description: ReceiveSlackEvent payload
+        in: body
+        name: _
+        required: true
+        schema:
+          $ref: '#/definitions/slack.ReceiveSlackEvent'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/api.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Receive a Slack event and chat with Ava
       tags:
       - Chat
   /knowledge:

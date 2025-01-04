@@ -191,6 +191,52 @@
                 }
             }
         },
+        "/event/slack": {
+            "post": {
+                "description": "used to chat with Ava when a slack event is received",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Receive a Slack event and chat with Ava",
+                "parameters": [
+                    {
+                        "description": "ReceiveSlackEvent payload",
+                        "name": "_",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/slack.ReceiveSlackEvent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/api.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/knowledge": {
             "post": {
                 "description": "used to add knowledge to Ava",
@@ -505,6 +551,197 @@
                     "type": "integer"
                 },
                 "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "slack.ReceiveSlackEvent": {
+            "type": "object",
+            "properties": {
+                "api_app_id": {
+                    "type": "string"
+                },
+                "authorizations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/slack.SlackAuthorization"
+                    }
+                },
+                "challenge": {
+                    "type": "string"
+                },
+                "context_enterprise_id": {
+                    "type": "string"
+                },
+                "context_team_id": {
+                    "type": "string"
+                },
+                "event": {
+                    "$ref": "#/definitions/slack.SlackEvent"
+                },
+                "event_context": {
+                    "type": "string"
+                },
+                "event_id": {
+                    "type": "string"
+                },
+                "event_time": {
+                    "type": "integer"
+                },
+                "is_ext_shared_channel": {
+                    "type": "boolean"
+                },
+                "team_id": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "slack.SlackAttachment": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "fallback": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mrkdwn_in": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "text": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "title_link": {
+                    "type": "string"
+                }
+            }
+        },
+        "slack.SlackAuthorization": {
+            "type": "object",
+            "properties": {
+                "enterprise_id": {
+                    "type": "string"
+                },
+                "is_bot": {
+                    "type": "boolean"
+                },
+                "is_enterprise_install": {
+                    "type": "boolean"
+                },
+                "team_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "slack.SlackBlock": {
+            "type": "object",
+            "properties": {
+                "block_id": {
+                    "type": "string"
+                },
+                "elements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/slack.SlackBlockSection"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "slack.SlackBlockElement": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "slack.SlackBlockSection": {
+            "type": "object",
+            "properties": {
+                "elements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/slack.SlackBlockElement"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "slack.SlackEvent": {
+            "type": "object",
+            "properties": {
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/slack.SlackAttachment"
+                    }
+                },
+                "blocks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/slack.SlackBlock"
+                    }
+                },
+                "bot_id": {
+                    "type": "string"
+                },
+                "channel": {
+                    "type": "string"
+                },
+                "channel_type": {
+                    "type": "string"
+                },
+                "client_msg_id": {
+                    "type": "string"
+                },
+                "event_ts": {
+                    "type": "string"
+                },
+                "subtype": {
+                    "type": "string"
+                },
+                "team": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "thread_ts": {
+                    "type": "string"
+                },
+                "ts": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "user": {
                     "type": "string"
                 }
             }

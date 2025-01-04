@@ -12,14 +12,21 @@ model Chat {
   id          Int       @id @default(autoincrement())
   input       String
   thread      Thread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
-  threadId    Int
+  threadId    String
   response    String
   createdAt   DateTime  @default(now())
 }
 
 model Thread {
-  id          Int       @id @default(autoincrement())
-  threadId    String    @unique
-  chats       Chat[]    
+  id    String    @unique
+  chats       Chat[]   
+  events      Event[] 
+  createdAt   DateTime  @default(now())
+}
+
+model Event {
+  id          String    @unique
+  thread      Thread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  threadId    String
   createdAt   DateTime  @default(now())
 }

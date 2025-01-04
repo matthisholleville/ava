@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"sync/atomic"
 	"time"
 
@@ -28,6 +29,7 @@ import (
 
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
+	"github.com/matthisholleville/ava/pkg/events"
 	"github.com/matthisholleville/ava/pkg/logger"
 	"github.com/matthisholleville/ava/pkg/metrics"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -60,11 +62,12 @@ type Config struct {
 }
 
 type Server struct {
-	router *echo.Echo
-	logger logger.ILogger
-	config *Config
-	ctx    context.Context
-	db     *db.PrismaClient
+	router      *echo.Echo
+	logger      logger.ILogger
+	config      *Config
+	ctx         context.Context
+	db          *db.PrismaClient
+	eventClient events.IEvent
 }
 
 func NewServer(config *Config, logger logger.ILogger) (*Server, error) {
@@ -74,12 +77,23 @@ func NewServer(config *Config, logger logger.ILogger) (*Server, error) {
 		return nil, err
 	}
 
+	eventClient, err := events.GetClient(os.Getenv("EVENT_CLIENT_TYPE"))
+	if err != nil {
+		return nil, err
+	}
+
+	err = eventClient.Configure(logger, os.Getenv("SLACK_BOT_TOKEN"), dbClient)
+	if err != nil {
+		return nil, err
+	}
+
 	srv := &Server{
-		router: echo.New(),
-		logger: logger,
-		config: config,
-		ctx:    context.Background(),
-		db:     dbClient,
+		router:      echo.New(),
+		logger:      logger,
+		config:      config,
+		ctx:         context.Background(),
+		db:          dbClient,
+		eventClient: eventClient,
 	}
 
 	return srv, nil
@@ -95,6 +109,9 @@ func (s *Server) registerHandlers() {
 	chat.POST("/webhook", s.alertManagerWebhookChatHandler)
 	chat.GET("/:id", s.fetchChatHandler)
 	chat.POST("/:id", s.respondChatHandler)
+
+	event := s.router.Group("/event")
+	event.POST("/slack", s.slackEventHandler)
 
 	knowledge := s.router.Group("/knowledge")
 	knowledge.POST("", s.addKnowledgeHandler)

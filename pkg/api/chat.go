@@ -19,7 +19,6 @@ import (
 	"net/http"
 	"os"
 	"slices"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/matthisholleville/ava/pkg/chat"
@@ -119,7 +118,7 @@ func (s *Server) alertManagerWebhookChatHandler(echo echo.Context) error {
 		alreadyProcessedAlerts = append(alreadyProcessedAlerts, message)
 		s.logger.Info(fmt.Sprintf("Processing alert: %s", message))
 		s.logger.Debug("Init Chat")
-		threadID, _, err := chat.InitChat()
+		threadID, err := chat.InitChat()
 		if err != nil {
 			s.logger.Fatal(err.Error())
 			return s.ErrorResponseWithCode(echo, err.Error(), http.StatusInternalServerError)
@@ -198,7 +197,7 @@ func (s *Server) createChatHandler(echo echo.Context) error {
 	}
 
 	s.logger.Debug("Init Chat")
-	threadID, persistedThreadID, err := chat.InitChat()
+	threadID, err := chat.InitChat()
 	if err != nil {
 		s.logger.Fatal(err.Error())
 		return s.ErrorResponseWithCode(echo, err.Error(), http.StatusInternalServerError)
@@ -225,12 +224,7 @@ func (s *Server) createChatHandler(echo echo.Context) error {
 		}
 	}()
 
-	response := threadID
-	if persistedThreadID != -1 {
-		response = strconv.Itoa(persistedThreadID)
-	}
-
-	return s.JSONResponseWithCode(echo, fmt.Sprintf("/chat/%s", response), http.StatusCreated)
+	return s.JSONResponseWithCode(echo, fmt.Sprintf("/chat/%s", threadID), http.StatusCreated)
 }
 
 type FetchMessagesResponse struct {
@@ -253,11 +247,6 @@ type FetchMessagesResponse struct {
 // @Failure 400 {object} ErrorResponse
 func (s *Server) fetchChatHandler(echo echo.Context) error {
 	id := echo.Param("id")
-	threadID, err := strconv.Atoi(id)
-	if err != nil {
-		s.logger.Error("reading the request body failed", zap.Error(err))
-		return s.ErrorResponseWithCode(echo, err.Error(), http.StatusBadRequest)
-	}
 	chat, err := chat.NewChat(
 		"openai",
 		os.Getenv("OPENAI_API_KEY"),
@@ -268,7 +257,7 @@ func (s *Server) fetchChatHandler(echo echo.Context) error {
 		s.logger.Fatal(err.Error())
 		return s.ErrorResponseWithCode(echo, err.Error(), http.StatusInternalServerError)
 	}
-	messages, err := chat.FetchChatMessages(threadID)
+	messages, err := chat.FetchChatMessages(id)
 	if err != nil {
 		s.logger.Error(err.Error())
 		return s.ErrorResponseWithCode(echo, err.Error(), http.StatusInternalServerError)
@@ -304,11 +293,6 @@ func (s *Server) fetchChatHandler(echo echo.Context) error {
 // @Failure 400 {object} ErrorResponse
 func (s *Server) respondChatHandler(echo echo.Context) error {
 	id := echo.Param("id")
-	threadID, err := strconv.Atoi(id)
-	if err != nil {
-		s.logger.Error("reading the request body failed", zap.Error(err))
-		return s.ErrorResponseWithCode(echo, err.Error(), http.StatusBadRequest)
-	}
 
 	var data CreateNewChat
 
@@ -331,7 +315,7 @@ func (s *Server) respondChatHandler(echo echo.Context) error {
 		return s.ErrorResponseWithCode(echo, err.Error(), http.StatusInternalServerError)
 	}
 
-	dbThread, err := chat.GetThread(threadID)
+	dbThread, err := chat.GetThread(id)
 	if err != nil {
 		s.logger.Fatal(err.Error())
 		return s.ErrorResponseWithCode(echo, err.Error(), http.StatusInternalServerError)
@@ -339,7 +323,7 @@ func (s *Server) respondChatHandler(echo echo.Context) error {
 
 	go func() {
 		chatType := "response"
-		response, err := chat.Chat(data.Message, dbThread.ThreadID)
+		response, err := chat.Chat(data.Message, dbThread.ID)
 		if err != nil {
 			metrics.ChatCounter.WithLabelValues("error", chatType).Inc()
 			s.logger.Error(err.Error())
@@ -349,7 +333,7 @@ func (s *Server) respondChatHandler(echo echo.Context) error {
 		metrics.ChatCounter.WithLabelValues("success", chatType).Inc()
 		if chat.Persist {
 			s.logger.Debug("Persisting chat")
-			_, err := chat.PersistChat(data.Message, response, dbThread.ThreadID)
+			_, err := chat.PersistChat(data.Message, response, dbThread.ID)
 			if err != nil {
 				s.logger.Error(err.Error())
 				return
@@ -358,6 +342,6 @@ func (s *Server) respondChatHandler(echo echo.Context) error {
 		}
 	}()
 
-	return s.JSONResponseWithCode(echo, fmt.Sprintf("/chat/%d", dbThread.ID), http.StatusCreated)
+	return s.JSONResponseWithCode(echo, fmt.Sprintf("/chat/%s", dbThread.ID), http.StatusCreated)
 
 }

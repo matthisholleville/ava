@@ -110,22 +110,22 @@ func NewChat(
 	return client, nil
 }
 
-func (c *Chat) InitChat() (string, int, error) {
+func (c *Chat) InitChat() (string, error) {
 	c.logger.Info("Creates a new thread")
 	threadID, err := c.AIClient.CreateThread()
 	if err != nil {
-		return "", -1, err
+		return "", err
 	}
 
 	if c.Persist {
 		c.logger.Info("Persists the message")
-		persistedThread, err := c.PersistThread(*threadID)
+		_, err := c.PersistThread(*threadID)
 		if err != nil {
-			return "", -1, err
+			return "", err
 		}
-		return *threadID, persistedThread.ID, nil
+		return *threadID, nil
 	}
-	return *threadID, -1, nil
+	return *threadID, nil
 }
 
 func (c *Chat) Chat(message, threadID string) (string, error) {
@@ -142,7 +142,7 @@ func (c *Chat) Chat(message, threadID string) (string, error) {
 	)
 }
 
-func (c *Chat) FetchChatMessages(threadID int) ([]db.ChatModel, error) {
+func (c *Chat) FetchChatMessages(threadID string) ([]db.ChatModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_SQL_TIMEOUT)
 	defer cancel()
 	return c.db.Chat.FindMany(
@@ -150,7 +150,7 @@ func (c *Chat) FetchChatMessages(threadID int) ([]db.ChatModel, error) {
 	).Take(DEFAULT_MAX_RESULTS).Exec(ctx)
 }
 
-func (c *Chat) GetThread(threadID int) (*db.ThreadModel, error) {
+func (c *Chat) GetThread(threadID string) (*db.ThreadModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_SQL_TIMEOUT)
 	defer cancel()
 	return c.db.Thread.FindUnique(
@@ -162,7 +162,7 @@ func (c *Chat) PersistThread(threadID string) (*db.ThreadModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_SQL_TIMEOUT)
 	defer cancel()
 	return c.db.Thread.CreateOne(
-		db.Thread.ThreadID.Set(threadID),
+		db.Thread.ID.Set(threadID),
 	).Exec(ctx)
 }
 
@@ -174,7 +174,7 @@ func (c *Chat) FindThreadUnique(
 	return c.db.
 		Thread.
 		FindUnique(
-			db.Thread.ThreadID.Equals(threadID),
+			db.Thread.ID.Equals(threadID),
 		).Exec(ctx)
 }
 
@@ -184,7 +184,7 @@ func (c *Chat) PersistChat(chat, response, threadID string) (*db.ChatModel, erro
 	return c.db.Chat.CreateOne(
 		db.Chat.Input.Set(chat),
 		db.Chat.Thread.Link(
-			db.Thread.ThreadID.Equals(threadID),
+			db.Thread.ID.Equals(threadID),
 		),
 		db.Chat.Response.Set(response),
 	).Exec(ctx)

@@ -2,15 +2,21 @@ alertmanager:
   config:
     global:
       resolve_timeout: 5m
+      slack_api_url: 'https://hooks.slack.com/services/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'
     route:
-      receiver: "ava"
+      receiver: "ava-slack"
       group_wait: 30s
-      group_interval: 5m
+      group_interval: 1m
       repeat_interval: 12h
     receivers:
       - name: "ava"
         webhook_configs:
           - url: "http://ava:8080/chat/webhook"
+      - name: "ava-slack"
+        slack_configs:
+          - channel: "#alerts"
+            send_resolved: true
+            text: "<!channel> \nsummary: {{ .CommonAnnotations.summary }}\ndescription: {{ (index .Alerts 0).Annotations.description }}"
 
 server:
   global:

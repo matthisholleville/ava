@@ -168,12 +168,15 @@ curl -X POST https://your-url/chat \
 
 ----------
 
-For reacting to AlertManager webhooks, you simply need to specify the environment variable `ENABLE_EXECUTORS_ON_WEBHOOK`.
+For reacting to AlertManager webhooks, you simply need to enable `executors` in the configuration file.
 
 Example :
 
 ```bash
-export ENABLE_EXECUTORS_ON_WEBHOOK="true"
+# ava config
+executors:
+    enabled: true
+    ...
 ```
 
 </details>

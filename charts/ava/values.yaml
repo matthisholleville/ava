@@ -90,8 +90,6 @@ serviceMonitor:
     release: "monitoring"
 
 env:
-  - name: ENABLE_EXECUTORS_ON_WEBHOOK
-    value: "false"
   - name: SLACK_VALIDATION_TOKEN
     valueFrom:
       secretKeyRef:

@@ -21,6 +21,8 @@ Give it your runbooks, use existing executors (functions), or create your own fu
 
 **This system is experimental and should not be used in production without fully understanding the risks.**
 
+https://github.com/user-attachments/assets/0caf1e90-f8d0-4885-96c8-0db33173dfe4
+
 ## Motivations Behind `Ava`
 
 The motivation for creating `Ava` comes from my personal experience during on-call rotations. I wanted to make these moments—especially the ones that happen at night—easier for the SRE teams by automating as many repetitive tasks as possible using AI and a knowledge base (runbook). 

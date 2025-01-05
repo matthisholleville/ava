@@ -1,4 +1,4 @@
-// Copyright © 2024 Ava AI.
+// Copyright © 2025 Ava AI.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,21 +21,30 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type ListPod struct {
-	PodName       string `json:"podName"`
-	NamespaceName string `json:"namespaceName"`
+type ListNamespaces struct{}
+
+func (ListNamespaces) GetName() string {
+	return "listNamespaces"
 }
 
-func (ListPod) Exec(e common.Executor, jsonString string) string {
-	var podInfo GetPod
-	err := json.Unmarshal([]byte(jsonString), &podInfo)
-	if err != nil {
-		return "Error while retrieving the podName parameter:" + err.Error()
+func (ListNamespaces) GetDescription() string {
+	return "List all namespaces in the cluster"
+}
+
+func (ListNamespaces) GetParams() string {
+	return `
+	{
+		"type": "object",
+		"properties": {}
 	}
-	pod, err := e.Client.GetClient().CoreV1().Pods(podInfo.NamespaceName).List(e.Context, metav1.ListOptions{})
+	`
+}
+
+func (ListNamespaces) Exec(e common.Executor, jsonString string) string {
+	namespaces, err := e.Client.GetClient().CoreV1().Namespaces().List(e.Context, metav1.ListOptions{})
 	if err != nil {
-		return "Unable to retrieve pod information." + err.Error()
+		return "Unable to list namespaces: " + err.Error()
 	}
-	result, _ := json.Marshal(pod)
+	result, _ := json.Marshal(namespaces)
 	return string(result)
 }

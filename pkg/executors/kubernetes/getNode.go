@@ -1,4 +1,4 @@
-// Copyright © 2024 Ava AI.
+// Copyright © 2025 Ava AI.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,45 +21,41 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type GetPod struct {
-	PodName       string `json:"podName"`
-	NamespaceName string `json:"namespaceName"`
+type GetNode struct {
+	NodeName string `json:"nodeName"`
 }
 
-func (GetPod) GetName() string {
-	return "getPod"
+func (GetNode) GetName() string {
+	return "getNode"
 }
 
-func (GetPod) GetDescription() string {
-	return "Get the details of a pod"
+func (GetNode) GetDescription() string {
+	return "Get the details of a node"
 }
 
-func (GetPod) GetParams() string {
+func (GetNode) GetParams() string {
 	return `
 	{
 		"type": "object",
 		"properties": {
-			"podName": {
-			"type": "string"
-			},
-			"namespaceName": {
-			"type": "string"
+			"nodeName": {
+				"type": "string"
 			}
 		}
 	}
 	`
 }
 
-func (GetPod) Exec(e common.Executor, jsonString string) string {
-	var podInfo GetPod
-	err := json.Unmarshal([]byte(jsonString), &podInfo)
+func (GetNode) Exec(e common.Executor, jsonString string) string {
+	var nodeInfo GetNode
+	err := json.Unmarshal([]byte(jsonString), &nodeInfo)
 	if err != nil {
-		return "Error while retrieving the podName parameter:" + err.Error()
+		return "Error while retrieving the nodeName parameter: " + err.Error()
 	}
-	pod, err := e.Client.GetClient().CoreV1().Pods(podInfo.NamespaceName).Get(e.Context, podInfo.PodName, metav1.GetOptions{})
+	node, err := e.Client.GetClient().CoreV1().Nodes().Get(e.Context, nodeInfo.NodeName, metav1.GetOptions{})
 	if err != nil {
-		return "Unable to retrieve pod information." + err.Error()
+		return "Unable to retrieve node information: " + err.Error()
 	}
-	result, _ := json.Marshal(pod)
+	result, _ := json.Marshal(node)
 	return string(result)
 }

@@ -178,10 +178,26 @@ Executors are functions Ava can use to act on your system. OpenAI does not perfo
 
 ##### Kubernetes
 
-- `deletePod`: Deletes a pod.
+
+##### Read-only
+
+- `describeService`: Describe details of a service.
+- `getCronJobs`:  List all CronJobs in a namespace.
+- `getDeployment`: Retrieve details of a deployment.
+- `getHPA`: Retrieve the status of Horizontal Pod Autoscalers in a namespace.
+- `getNode`: Get the details of a node.
 - `getPod`: Gets pod details.
-- `listPod`: Lists pods in a namespace.
-- `logsPod`: Shows the last 100 lines of pod logs.
+- `listNamespaces`: List all namespaces in the cluster.
+- `listPods`: Lists pods in a namespace.
+- `podLogs`: Shows the last 100 lines of pod logs.
+- `topPods`: Retrieve CPU and memory usage of all pods in a namespace.
+
+##### Write
+
+**By default, these executors can impact environments and are not enabled. To activate them, simply enable them in the configuration.**
+
+- `deletePod`: Delete a pod.
+- `rolloutDeployment`: Perform a rollout restart for a deployment.
 
 ##### Common
 

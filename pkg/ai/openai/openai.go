@@ -16,6 +16,7 @@ package openai
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"path/filepath"
@@ -237,6 +238,24 @@ func (c *OpenAIClient) ConfigureKnowledge(logger logger.ILogger) error {
 	return nil
 }
 
+func (c *OpenAIClient) executorToFunctionTool() []openai.AssistantTool {
+	var functions []openai.AssistantTool
+
+	executors := executors.GetExecutors()
+	for _, executor := range executors {
+		functions = append(functions, openai.AssistantTool{
+			Function: &openai.FunctionDefinition{
+				Name:        executor.GetName(),
+				Parameters:  json.RawMessage([]byte(executor.GetParams())),
+				Description: executor.GetDescription(),
+			},
+			Type: openai.AssistantToolTypeFunction,
+		})
+
+	}
+	return functions
+}
+
 func (c *OpenAIClient) ConfigureAssistant(logger logger.ILogger, enableExecutors bool) error {
 	err := c.Configure(logger)
 	if err != nil {
@@ -284,7 +303,7 @@ func (c *OpenAIClient) ConfigureAssistant(logger logger.ILogger, enableExecutors
 
 	if enableExecutors {
 		c.logger.Debug("Adding the executors to the assistant")
-		tools = append(tools, Functions...)
+		tools = append(tools, c.executorToFunctionTool()...)
 	}
 	c.enableExecutors = enableExecutors
 

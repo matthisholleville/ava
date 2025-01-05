@@ -21,27 +21,23 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type GetPod struct {
-	PodName       string `json:"podName"`
+type ListPods struct {
 	NamespaceName string `json:"namespaceName"`
 }
 
-func (GetPod) GetName() string {
-	return "getPod"
+func (ListPods) GetName() string {
+	return "listPods"
 }
 
-func (GetPod) GetDescription() string {
-	return "Get the details of a pod"
+func (ListPods) GetDescription() string {
+	return "List all pods in a namespace"
 }
 
-func (GetPod) GetParams() string {
+func (ListPods) GetParams() string {
 	return `
 	{
 		"type": "object",
 		"properties": {
-			"podName": {
-			"type": "string"
-			},
 			"namespaceName": {
 			"type": "string"
 			}
@@ -50,15 +46,15 @@ func (GetPod) GetParams() string {
 	`
 }
 
-func (GetPod) Exec(e common.Executor, jsonString string) string {
-	var podInfo GetPod
-	err := json.Unmarshal([]byte(jsonString), &podInfo)
+func (ListPods) Exec(e common.Executor, jsonString string) string {
+	var podsInfos ListPods
+	err := json.Unmarshal([]byte(jsonString), &podsInfos)
 	if err != nil {
-		return "Error while retrieving the podName parameter:" + err.Error()
+		return "Error while retrieving the NamespaceName parameter:" + err.Error()
 	}
-	pod, err := e.Client.GetClient().CoreV1().Pods(podInfo.NamespaceName).Get(e.Context, podInfo.PodName, metav1.GetOptions{})
+	pod, err := e.Client.GetClient().CoreV1().Pods(podsInfos.NamespaceName).List(e.Context, metav1.ListOptions{})
 	if err != nil {
-		return "Unable to retrieve pod information." + err.Error()
+		return "Unable to list pods." + err.Error()
 	}
 	result, _ := json.Marshal(pod)
 	return string(result)

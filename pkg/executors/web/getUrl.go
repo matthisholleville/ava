@@ -26,6 +26,27 @@ type GetUrl struct {
 	Url string `json:"url"`
 }
 
+func (GetUrl) GetName() string {
+	return "getUrl"
+}
+
+func (GetUrl) GetDescription() string {
+	return "Call a URL and return the status code and response time"
+}
+
+func (GetUrl) GetParams() string {
+	return `
+	{
+		"type": "object",
+		"properties": {
+			"url": {
+			"type": "string"
+			}
+		}
+	}
+	`
+}
+
 func (GetUrl) Exec(e common.Executor, jsonString string) string {
 	// execute a check on the url and return the status code
 	var urlInfo GetUrl

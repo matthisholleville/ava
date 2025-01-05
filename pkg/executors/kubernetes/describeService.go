@@ -1,4 +1,4 @@
-// Copyright © 2024 Ava AI.
+// Copyright © 2025 Ava AI.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,45 +21,45 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type GetPod struct {
-	PodName       string `json:"podName"`
+type DescribeService struct {
+	ServiceName   string `json:"serviceName"`
 	NamespaceName string `json:"namespaceName"`
 }
 
-func (GetPod) GetName() string {
-	return "getPod"
+func (DescribeService) GetName() string {
+	return "describeService"
 }
 
-func (GetPod) GetDescription() string {
-	return "Get the details of a pod"
+func (DescribeService) GetDescription() string {
+	return "Describe details of a service"
 }
 
-func (GetPod) GetParams() string {
+func (DescribeService) GetParams() string {
 	return `
 	{
 		"type": "object",
 		"properties": {
-			"podName": {
-			"type": "string"
+			"serviceName": {
+				"type": "string"
 			},
 			"namespaceName": {
-			"type": "string"
+				"type": "string"
 			}
 		}
 	}
 	`
 }
 
-func (GetPod) Exec(e common.Executor, jsonString string) string {
-	var podInfo GetPod
-	err := json.Unmarshal([]byte(jsonString), &podInfo)
+func (DescribeService) Exec(e common.Executor, jsonString string) string {
+	var serviceInfo DescribeService
+	err := json.Unmarshal([]byte(jsonString), &serviceInfo)
 	if err != nil {
-		return "Error while retrieving the podName parameter:" + err.Error()
+		return "Error while retrieving parameters: " + err.Error()
 	}
-	pod, err := e.Client.GetClient().CoreV1().Pods(podInfo.NamespaceName).Get(e.Context, podInfo.PodName, metav1.GetOptions{})
+	service, err := e.Client.GetClient().CoreV1().Services(serviceInfo.NamespaceName).Get(e.Context, serviceInfo.ServiceName, metav1.GetOptions{})
 	if err != nil {
-		return "Unable to retrieve pod information." + err.Error()
+		return "Unable to describe service: " + err.Error()
 	}
-	result, _ := json.Marshal(pod)
+	result, _ := json.Marshal(service)
 	return string(result)
 }

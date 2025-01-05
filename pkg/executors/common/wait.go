@@ -26,6 +26,27 @@ type Wait struct {
 	Time string `json:"time"`
 }
 
+func (Wait) GetName() string {
+	return "wait"
+}
+
+func (Wait) GetDescription() string {
+	return "Wait for a specified time in seconds"
+}
+
+func (Wait) GetParams() string {
+	return `
+	{
+		"type": "object",
+		"properties": {
+			"time": {
+			"type": "string"
+			}
+		}
+	}
+	`
+}
+
 func (Wait) Exec(e common.Executor, jsonString string) string {
 	// execute a check on the url and return the status code
 	var waitInfo Wait
@@ -33,7 +54,7 @@ func (Wait) Exec(e common.Executor, jsonString string) string {
 	if err != nil {
 		return "Error while retrieving the wait parameter:" + err.Error()
 	}
-	
+
 	// Convert the wait time to an integer
 	waitSeconds, err := strconv.Atoi(waitInfo.Time)
 	if err != nil {

@@ -25,13 +25,37 @@ var (
 	tailLines = int64(100)
 )
 
-type LogsPod struct {
+type PodLogs struct {
 	PodName       string `json:"podName"`
 	NamespaceName string `json:"namespaceName"`
 }
 
-func (LogsPod) Exec(e common.Executor, jsonString string) string {
-	var podInfo LogsPod
+func (PodLogs) GetName() string {
+	return "podLogs"
+}
+
+func (PodLogs) GetDescription() string {
+	return "Get the logs of a pod"
+}
+
+func (PodLogs) GetParams() string {
+	return `
+	{
+		"type": "object",
+		"properties": {
+			"podName": {
+			"type": "string"
+			},
+			"namespaceName": {
+			"type": "string"
+			}
+		}
+	}
+	`
+}
+
+func (PodLogs) Exec(e common.Executor, jsonString string) string {
+	var podInfo PodLogs
 	err := json.Unmarshal([]byte(jsonString), &podInfo)
 	if err != nil {
 		return "Error while retrieving the podName parameter:" + err.Error()

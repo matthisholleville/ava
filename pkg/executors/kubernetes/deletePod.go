@@ -27,6 +27,30 @@ type DeletePod struct {
 	NamespaceName string `json:"namespaceName"`
 }
 
+func (DeletePod) GetName() string {
+	return "deletePod"
+}
+
+func (DeletePod) GetDescription() string {
+	return "Delete a pod"
+}
+
+func (DeletePod) GetParams() string {
+	return `
+	{
+		"type": "object",
+		"properties": {
+			"podName": {
+			"type": "string"
+			},
+			"namespaceName": {
+			"type": "string"
+			}
+		}
+	}
+	`
+}
+
 func (DeletePod) Exec(e common.Executor, jsonString string) string {
 	var podInfo GetPod
 	err := json.Unmarshal([]byte(jsonString), &podInfo)

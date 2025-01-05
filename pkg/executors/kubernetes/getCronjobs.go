@@ -1,4 +1,4 @@
-// Copyright © 2024 Ava AI.
+// Copyright © 2025 Ava AI.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,45 +21,41 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type GetPod struct {
-	PodName       string `json:"podName"`
+type GetCronJobs struct {
 	NamespaceName string `json:"namespaceName"`
 }
 
-func (GetPod) GetName() string {
-	return "getPod"
+func (GetCronJobs) GetName() string {
+	return "getCronJobs"
 }
 
-func (GetPod) GetDescription() string {
-	return "Get the details of a pod"
+func (GetCronJobs) GetDescription() string {
+	return "List all CronJobs in a namespace"
 }
 
-func (GetPod) GetParams() string {
+func (GetCronJobs) GetParams() string {
 	return `
 	{
 		"type": "object",
 		"properties": {
-			"podName": {
-			"type": "string"
-			},
 			"namespaceName": {
-			"type": "string"
+				"type": "string"
 			}
 		}
 	}
 	`
 }
 
-func (GetPod) Exec(e common.Executor, jsonString string) string {
-	var podInfo GetPod
-	err := json.Unmarshal([]byte(jsonString), &podInfo)
+func (GetCronJobs) Exec(e common.Executor, jsonString string) string {
+	var cronJobInfo GetCronJobs
+	err := json.Unmarshal([]byte(jsonString), &cronJobInfo)
 	if err != nil {
-		return "Error while retrieving the podName parameter:" + err.Error()
+		return "Error while retrieving the NamespaceName parameter: " + err.Error()
 	}
-	pod, err := e.Client.GetClient().CoreV1().Pods(podInfo.NamespaceName).Get(e.Context, podInfo.PodName, metav1.GetOptions{})
+	cronJobs, err := e.Client.GetClient().BatchV1beta1().CronJobs(cronJobInfo.NamespaceName).List(e.Context, metav1.ListOptions{})
 	if err != nil {
-		return "Unable to retrieve pod information." + err.Error()
+		return "Unable to list CronJobs: " + err.Error()
 	}
-	result, _ := json.Marshal(pod)
+	result, _ := json.Marshal(cronJobs)
 	return string(result)
 }

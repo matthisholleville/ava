@@ -36,6 +36,10 @@ func (c *Client) GetRestClient() rest.Interface {
 	return c.RestClient
 }
 
+func (c *Client) GetMetricsClient() versioned.Interface {
+	return &c.MetricsClient
+}
+
 func NewClient(kubecontext string, kubeconfig string) (*Client, error) {
 	var config *rest.Config
 	config, err := rest.InClusterConfig()

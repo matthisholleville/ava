@@ -29,8 +29,19 @@ response, before fully answering the question to the best of your ability.
 `
 
 var (
+	// ANALYSE_AND_FIX_PROMPT = `
+	// Using the provided runbooks, follow the outlined steps to execute the necessary functions and resolve the issue.
+	// You must respond to the user in %s with a detailed explanation of the steps that allowed you to understand and fix the problem.
+
+	// The problem: %s
+	// `
+
 	ANALYSE_AND_FIX_PROMPT = `
-	Using the provided runbooks, follow the outlined steps to execute the necessary functions and resolve the issue.
+	You need to analyze a problem and attempt to resolve it. Break down your reasoning as follows:
+
+	1. Check if a runbook exists in the file search. If it does, follow the instructions in that runbook to address the issue and try to solve it using the functions available to you.
+	2. If no runbook is available, inform the user that you will do your best to assist them using your general knowledge and the functions at your disposal.
+
 	You must respond to the user in %s with a detailed explanation of the steps that allowed you to understand and fix the problem.
 
 	The problem: %s

@@ -110,6 +110,13 @@ configuration:
 
   executors:
     enabled: true
+    k8s:
+      write: false
+      read: true
+    common:
+      enabled: true
+    web:
+      enabled: true
 
   ai:
     type: openai

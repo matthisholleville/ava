@@ -24,6 +24,22 @@ type GithubKnowledge struct {
 }
 
 type Executors struct {
+	Enabled bool            `yaml:"enabled,omitempty"`
+	K8S     K8SExecutors    `yaml:"k8s,omitempty"`
+	Common  CommonExecutors `yaml:"common,omitempty"`
+	Web     WebExecutors    `yaml:"web,omitempty"`
+}
+
+type K8SExecutors struct {
+	Read  bool `yaml:"read,omitempty"`
+	Write bool `yaml:"write,omitempty"`
+}
+
+type CommonExecutors struct {
+	Enabled bool `yaml:"enabled,omitempty"`
+}
+
+type WebExecutors struct {
 	Enabled bool `yaml:"enabled,omitempty"`
 }
 

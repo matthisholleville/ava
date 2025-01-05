@@ -17,7 +17,6 @@ package api
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/matthisholleville/ava/pkg/ai/openai"
@@ -34,7 +33,6 @@ type CreateNewKnowledge struct {
 	GitRepositoryURL string `json:"gitRepositoryURL,omitempty" example:""`
 	GitAuthToken     string `json:"gitAuthToken,omitempty" example:""`
 	GitBranch        string `json:"gitBranch,omitempty" example:""`
-	Backend          string `json:"backend,omitempty" example:"openai"`
 }
 
 // Knowledge godoc
@@ -60,9 +58,9 @@ func (s *Server) addKnowledgeHandler(echo echo.Context) error {
 	}
 
 	backendKnowledge, err := backendKnowledge.NewBackendKnowledge(backendKnowledge.KnowledgeConfiguration{
-		ActiveProvider: data.Backend,
+		ActiveProvider: s.aiBackend,
 		OpenAI: openai.Configuration{
-			APIKey: os.Getenv("OPENAI_API_KEY"),
+			APIKey: s.aiBackendPassword,
 		},
 	})
 	if err != nil {
@@ -117,7 +115,6 @@ func (s *Server) addKnowledgeHandler(echo echo.Context) error {
 
 // PurgeKnowledge  Purge knowledge.
 type PurgeKnowledge struct {
-	Backend string `json:"backend,omitempty" example:"openai"`
 }
 
 // Knowledge godoc
@@ -143,9 +140,9 @@ func (s *Server) purgeKnowledgeHandler(echo echo.Context) error {
 	}
 
 	backendKnowledge, err := backendKnowledge.NewBackendKnowledge(backendKnowledge.KnowledgeConfiguration{
-		ActiveProvider: data.Backend,
+		ActiveProvider: s.aiBackend,
 		OpenAI: openai.Configuration{
-			APIKey: os.Getenv("OPENAI_API_KEY"),
+			APIKey: s.aiBackendPassword,
 		},
 	})
 	if err != nil {

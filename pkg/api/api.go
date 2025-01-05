@@ -19,20 +19,20 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"sync/atomic"
 	"time"
 
 	_ "github.com/matthisholleville/ava/docs"
+	"github.com/matthisholleville/ava/internal/configuration"
 	db "github.com/matthisholleville/ava/internal/prisma"
 	"github.com/prometheus/client_golang/prometheus"
+	echoSwagger "github.com/swaggo/echo-swagger"
 
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/matthisholleville/ava/pkg/events"
 	"github.com/matthisholleville/ava/pkg/logger"
 	"github.com/matthisholleville/ava/pkg/metrics"
-	echoSwagger "github.com/swaggo/echo-swagger"
 	"go.uber.org/zap"
 )
 
@@ -62,60 +62,85 @@ type Config struct {
 }
 
 type Server struct {
-	router      *echo.Echo
-	logger      logger.ILogger
-	config      *Config
-	ctx         context.Context
-	db          *db.PrismaClient
-	eventClient events.IEvent
+	router            *echo.Echo
+	logger            logger.ILogger
+	config            *Config
+	ctx               context.Context
+	db                *db.PrismaClient
+	eventClient       events.IEvent
+	avaCfg            *configuration.Configuration
+	aiBackend         string
+	aiBackendPassword string
+	enableExecutors   bool
 }
 
-func NewServer(config *Config, logger logger.ILogger) (*Server, error) {
+func NewServer(config *Config, logger logger.ILogger, avaCfg *configuration.Configuration) (*Server, error) {
 
 	dbClient := db.NewClient()
 	if err := dbClient.Prisma.Connect(); err != nil {
 		return nil, err
 	}
 
-	eventClient, err := events.GetClient(os.Getenv("EVENT_CLIENT_TYPE"))
+	eventClient, err := events.GetClient(avaCfg.Events.Type)
 	if err != nil {
 		return nil, err
 	}
 
-	err = eventClient.Configure(logger, os.Getenv("SLACK_BOT_TOKEN"), dbClient)
-	if err != nil {
-		return nil, err
+	if avaCfg.Events.Type == "slack" {
+		err = eventClient.Configure(logger, avaCfg.Events.Slack.BotToken, dbClient)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	srv := &Server{
-		router:      echo.New(),
-		logger:      logger,
-		config:      config,
-		ctx:         context.Background(),
-		db:          dbClient,
-		eventClient: eventClient,
+		router:            echo.New(),
+		logger:            logger,
+		config:            config,
+		ctx:               context.Background(),
+		db:                dbClient,
+		eventClient:       eventClient,
+		avaCfg:            avaCfg,
+		aiBackend:         avaCfg.AI.Type,
+		aiBackendPassword: avaCfg.AI.OpenAI.APIKey,
+		enableExecutors:   avaCfg.Executors.Enabled,
 	}
 
 	return srv, nil
 }
 
 func (s *Server) registerHandlers() {
-	s.router.GET("/swagger/*", echoSwagger.WrapHandler)
+	if s.avaCfg.API.Swagger.Enabled {
+		s.logger.Debug("Swagger enabled")
+		s.router.GET("/swagger/*", echoSwagger.WrapHandler)
+	}
+
 	s.router.GET("/live", s.healthzHandler)
 	s.router.GET("/readyz", s.readyzHandler)
 
-	chat := s.router.Group("/chat")
-	chat.POST("", s.createChatHandler)
-	chat.POST("/webhook", s.alertManagerWebhookChatHandler)
-	chat.GET("/:id", s.fetchChatHandler)
-	chat.POST("/:id", s.respondChatHandler)
+	if s.avaCfg.API.Chat.Enabled {
+		s.logger.Debug("Chat API enabled")
+		chat := s.router.Group("/chat")
+		chat.POST("", s.createChatHandler)
+		chat.POST("/webhook", s.alertManagerWebhookChatHandler)
+		chat.GET("/:id", s.fetchChatHandler)
+		chat.POST("/:id", s.respondChatHandler)
+	}
 
-	event := s.router.Group("/event")
-	event.POST("/slack", s.slackEventHandler)
+	if s.avaCfg.API.Events.Enabled {
+		s.logger.Debug("Events API enabled")
+		event := s.router.Group("/event")
+		if s.avaCfg.Events.Type == "slack" {
+			event.POST("/slack", s.slackEventHandler)
+		}
+	}
 
-	knowledge := s.router.Group("/knowledge")
-	knowledge.POST("", s.addKnowledgeHandler)
-	knowledge.DELETE("", s.purgeKnowledgeHandler)
+	if s.avaCfg.API.Knowledge.Enabled {
+		s.logger.Debug("Knowledge API enabled")
+		knowledge := s.router.Group("/knowledge")
+		knowledge.POST("", s.addKnowledgeHandler)
+		knowledge.DELETE("", s.purgeKnowledgeHandler)
+	}
 }
 
 func (s *Server) registerMiddlewares() {

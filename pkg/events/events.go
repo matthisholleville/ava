@@ -46,4 +46,5 @@ type IEvent interface {
 	ProcessEvent(data interface{}) (message string, threadID string, err error)
 	PersistEvent(eventID, threadID string) (*db.EventModel, error)
 	SendTechnicalErrorMessage(channelID, ts string) error
+	SendLookingMessage(channelID, ts string) error
 }

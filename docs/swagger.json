@@ -201,7 +201,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Chat"
+                    "Event"
                 ],
                 "summary": "Receive a Slack event and chat with Ava",
                 "parameters": [
@@ -422,14 +422,6 @@
         "api.CreateNewChat": {
             "type": "object",
             "properties": {
-                "backend": {
-                    "type": "string",
-                    "example": "openai"
-                },
-                "enableExecutors": {
-                    "type": "boolean",
-                    "example": true
-                },
                 "language": {
                     "type": "string",
                     "example": "en"
@@ -443,10 +435,6 @@
         "api.CreateNewKnowledge": {
             "type": "object",
             "properties": {
-                "backend": {
-                    "type": "string",
-                    "example": "openai"
-                },
                 "gitAuthToken": {
                     "type": "string",
                     "example": ""
@@ -492,13 +480,7 @@
             }
         },
         "api.PurgeKnowledge": {
-            "type": "object",
-            "properties": {
-                "backend": {
-                    "type": "string",
-                    "example": "openai"
-                }
-            }
+            "type": "object"
         },
         "api.SuccessResponse": {
             "type": "object",

@@ -42,11 +42,14 @@ To achieve this, I’ve built Ava using an REAct AI model powered by OpenAI Assi
 - Works with Alert Manager webhooks.
 - REST API.
 - Compatible with OpenAI.
-- Add an interactive mode to let Ava recheck if the issue is fixed after some time.
+- React with Slack event
 - Allow importing knowledge bases from local path & Github.
 - More features coming soon... check the roadmap below.
 
-[Watch the Ava demo on YouTube](https://youtu.be/VDAJqaBEv-s)
+## Demo 
+
+- [Watch the Ava CLI demo on YouTube](https://youtu.be/VDAJqaBEv-s)
+- [Watch the Ava Slack Bot demo on Youtube](https://youtu.be/ya9ySnGCTak)
 
 ## Installation
 
@@ -62,6 +65,15 @@ To achieve this, I’ve built Ava using an REAct AI model powered by OpenAI Assi
     ```bash
     make build
     ```
+
+## Configuration
+
+A.V.A uses a configuration file to set up its usage. By default, this file is located at `./config/ava.yaml`. You can change the configuration folder using the `--config` flag.
+
+This file is essential, and A.V.A cannot start without it. It should not contain sensitive data. For such cases, you can use environment variables.
+
+When starting up, A.V.A parses the configuration file. If it detects a value matching the pattern `${.*}`, it will extract the content and check if an environment variable exists with that name. If not, the program will fail and return an error log.
+
 
 ## Usage
 
@@ -179,7 +191,85 @@ Executors are functions Ava can use to act on your system. OpenAI does not perfo
 
 - `getUrl`: Makes a `GET` request to a URL and returns status and timing.
 
+## Serve Mode
+
+Ava provides an REST API. The CLI mode and SERVER mode offer the same features, with one key difference: the API mode requires a PostgreSQL database to function.
+
+The API stores chat results, threads, and other information in the database, which can be particularly useful for auditing purposes.
+
+### Running the Server Mode
+
+<details>
+
+<summary>Steps to Launch Server Mode</summary>
+
+**Before starting the server mode, you need a PostgreSQL database up and running.** You can use Docker or a cloud solution like CloudSQL.
+
+1. Rename `.envrc-sample` to `.envrc`.
+2. Update the environment variable `export DATABASE_URL="CHANGE_ME"` with a valid connection string.
+3. Export the variables: `direnv allow`.
+4. Initialize the PostgreSQL schema: 
+    ```bash
+    go run github.com/steebchen/prisma-client-go db push
+    ```
+5. Generate the Swagger documentation: 
+    ```bash
+    make swagger
+    ```
+6. Start the server mode: 
+    ```bash
+    go run main.go serve
+    ```
+
+Once launched, you can access the Swagger documentation at the following URL: [http://localhost:8080/swagger/index.html#](http://localhost:8080/swagger/index.html#).
+
+</details>
+
+
+## Roadmap
+
+- Connect Ava to Slack (or other platforms) to update alert statuses in a channel.
+- Create new executors for Kubernetes, databases (e.g., killing a PID), Prometheus, and Grafana (e.g., getting dashboard screenshots).
+- Allow importing knowledge bases from other sources (e.g., Backstage, Notion).
+- Support other AI backends (e.g., Llama, Gemini).
+- Automatic PostMortem Generation.
+
 ## Examples
+
+<details>
+
+<summary>Connecting Slack</summary>
+
+### Installation
+
+Before connecting Slack, you must deploy A.V.A. To connect A.V.A to Slack, follow the steps below:
+
+1. Create a [new Slack App](https://api.slack.com/apps) named `Ava Bot`. **The name is crucial and must not be changed!**
+2. Copy the `Verification Token` from the `Basic Information` page and the `Bot User OAuth Token` from the `OAuth & Permissions` page of your Slack application, then paste them into Ava's configuration file (e.g., `./config/ava.yaml` or `./charts/ava/values.yaml` if you uses Kubernetes):
+    ```yaml
+    # ava config
+    events:
+        type: slack
+        slack:
+            validationToken: ${SLACK_VALIDATION_TOKEN}
+            botToken: ${SLACK_BOT_TOKEN}
+    ```
+    - **If you use Kubernetes dont forget to create the K8s secret for Slack** `kubectl create secret generic slack-secret --from-literal=validation-token=$(echo $SLACK_VALIDATION_TOKEN) --from-literal=bot-token=$(echo $SLACK_BOT_TOKEN)`
+3. Start A.V.A in server mode with a publicly accessible URL so Slack can send events.
+4. On the `Event Subscriptions` page, enable events and add your URL in the `Request URL` section (`$MY_URL/event/slack`).
+5. Further down on the same page, open the `Subscribe to bot events` section and add the permissions `message:channels` and `message:groups`.
+6. On the `OAuth & Permissions` page, add the scopes `chat:write`, `users.profile:read`, and `users:read`.
+7. Install your app into the desired channel(s).
+
+You can test the setup by sending a direct message to your bot: `@Ava Bot Hello how are you today?`. You should see A.V.A react to the event in its logs and send a Slack message containing `👀`.
+
+### Interacting with A.V.A
+
+To start interacting with A.V.A, you can:
+- Begin your message by mentioning it: `@Ava Bot my pod example is crashlooping. Do we have any runbook to understand & fix the problem?`
+- Configure AlertManager to send a Slack message. A.V.A will respond not only when mentioned but also to messages from other bots.
+
+</details>
 
 <details>
 
@@ -242,49 +332,6 @@ curl http://$(kubectl get svc web-server-service -o jsonpath='{.status.loadBalan
 This will trigger chaos in the webserver. Ava should detect the issue and fix it. After a few minutes, your pod should be healthy.
 
 </details>
-
-## Serve Mode
-
-Ava provides an REST API. The CLI mode and SERVER mode offer the same features, with one key difference: the API mode requires a PostgreSQL database to function.
-
-The API stores chat results, threads, and other information in the database, which can be particularly useful for auditing purposes.
-
-### Running the Server Mode
-
-<details>
-
-<summary>Steps to Launch Server Mode</summary>
-
-**Before starting the server mode, you need a PostgreSQL database up and running.** You can use Docker or a cloud solution like CloudSQL.
-
-1. Rename `.envrc-sample` to `.envrc`.
-2. Update the environment variable `export DATABASE_URL="CHANGE_ME"` with a valid connection string.
-3. Export the variables: `direnv allow`.
-4. Initialize the PostgreSQL schema: 
-    ```bash
-    go run github.com/steebchen/prisma-client-go db push
-    ```
-5. Generate the Swagger documentation: 
-    ```bash
-    make swagger
-    ```
-6. Start the server mode: 
-    ```bash
-    go run main.go serve
-    ```
-
-Once launched, you can access the Swagger documentation at the following URL: [http://localhost:8080/swagger/index.html#](http://localhost:8080/swagger/index.html#).
-
-</details>
-
-
-## Roadmap
-
-- Connect Ava to Slack (or other platforms) to update alert statuses in a channel.
-- Create new executors for Kubernetes, databases (e.g., killing a PID), Prometheus, and Grafana (e.g., getting dashboard screenshots).
-- Allow importing knowledge bases from other sources (e.g., Backstage, Notion).
-- Support other AI backends (e.g., Llama, Gemini).
-- Automatic PostMortem Generation.
 
 ## Contributing
 

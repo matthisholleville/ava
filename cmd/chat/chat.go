@@ -16,8 +16,8 @@ package chat
 
 import (
 	"fmt"
-	"os"
 
+	"github.com/matthisholleville/ava/internal/configuration"
 	"github.com/matthisholleville/ava/pkg/chat"
 	"github.com/matthisholleville/ava/pkg/logger"
 	"github.com/spf13/cobra"
@@ -25,13 +25,12 @@ import (
 )
 
 var (
-	language        string
-	backend         string
-	kubecontext     string
-	kubeconfig      string
-	message         string
-	thread          string
-	enableExecutors bool
+	language    string
+	backend     string
+	kubecontext string
+	kubeconfig  string
+	message     string
+	thread      string
 )
 
 var ChatCmd = &cobra.Command{
@@ -40,15 +39,16 @@ var ChatCmd = &cobra.Command{
 	Long:  `Chat with Ava.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := viper.Get("logger").(logger.ILogger)
+		configuration := configuration.LoadConfiguration(logger)
 
 		logger.Info("Chatting with Ava")
 
 		chat, err := chat.NewChat(
 			backend,
-			os.Getenv("OPENAI_API_KEY"),
+			configuration.AI.OpenAI.APIKey,
 			logger,
 			chat.WithLanguage(language),
-			chat.WithConfigureAssistant(logger, enableExecutors),
+			chat.WithConfigureAssistant(logger, configuration.Executors.Enabled),
 		)
 		if err != nil {
 			logger.Fatal(err.Error())
@@ -79,5 +79,4 @@ func init() {
 	ChatCmd.Flags().StringVar(&kubecontext, "kubecontext", "", "Kubernetes context to use. Only required if out-of-cluster.")
 	ChatCmd.Flags().StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	ChatCmd.Flags().StringVar(&thread, "thread", "", "Thread ID to use. Only required if you want to continue a conversation.")
-	ChatCmd.Flags().BoolVar(&enableExecutors, "enable-executors", false, "Enable executors")
 }

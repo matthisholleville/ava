@@ -212,7 +212,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Chat"
+                    "Event"
                 ],
                 "summary": "Receive a Slack event and chat with Ava",
                 "parameters": [
@@ -433,14 +433,6 @@ const docTemplate = `{
         "api.CreateNewChat": {
             "type": "object",
             "properties": {
-                "backend": {
-                    "type": "string",
-                    "example": "openai"
-                },
-                "enableExecutors": {
-                    "type": "boolean",
-                    "example": true
-                },
                 "language": {
                     "type": "string",
                     "example": "en"
@@ -454,10 +446,6 @@ const docTemplate = `{
         "api.CreateNewKnowledge": {
             "type": "object",
             "properties": {
-                "backend": {
-                    "type": "string",
-                    "example": "openai"
-                },
                 "gitAuthToken": {
                     "type": "string",
                     "example": ""
@@ -503,13 +491,7 @@ const docTemplate = `{
             }
         },
         "api.PurgeKnowledge": {
-            "type": "object",
-            "properties": {
-                "backend": {
-                    "type": "string",
-                    "example": "openai"
-                }
-            }
+            "type": "object"
         },
         "api.SuccessResponse": {
             "type": "object",

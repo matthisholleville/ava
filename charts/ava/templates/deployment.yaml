@@ -13,10 +13,11 @@ spec:
       {{- include "ava.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        checksum/config: {{ .Values.configuration | toYaml | sha256sum }}
       labels:
         {{- include "ava.selectorLabels" . | nindent 8 }}
     spec:
@@ -30,6 +31,7 @@ spec:
       initContainers:
         - name: setup-ava
           image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag | default .Chart.AppVersion }}"
+          args: ["--accept-data-loss"]
           env:
             - name: DATABASE_URL
               value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ .Release.Name }}-postgresql:5432/{{ .Values.postgresql.auth.database }}"
@@ -39,7 +41,10 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args: ["serve", "-f", "json"]
+          args: ["serve", "-f", "json", "--config", "/etc/ava/"]
+          volumeMounts:
+            - name: {{ include "ava.fullname" . }}-config
+              mountPath: /etc/ava
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -69,6 +74,10 @@ spec:
             {{- with .Values.env }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+      volumes:
+        - name: {{ include "ava.fullname" . }}-config
+          configMap:
+            name: {{ include "ava.fullname" . }}-config
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

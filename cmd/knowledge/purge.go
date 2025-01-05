@@ -15,8 +15,7 @@
 package knowledge
 
 import (
-	"os"
-
+	avaCfg "github.com/matthisholleville/ava/internal/configuration"
 	"github.com/matthisholleville/ava/pkg/ai/openai"
 	knowledge "github.com/matthisholleville/ava/pkg/knowledge/backend"
 	"github.com/matthisholleville/ava/pkg/logger"
@@ -30,11 +29,12 @@ var purgeCmd = &cobra.Command{
 	Long:  `Purge Ava's knowledge base.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := viper.Get("logger").(logger.ILogger)
+		avaCfg := avaCfg.LoadConfiguration(logger)
 		logger.Info("Purging Ava's knowledge base")
 		knowledge, err := knowledge.NewBackendKnowledge(knowledge.KnowledgeConfiguration{
-			ActiveProvider: "openai",
+			ActiveProvider: avaCfg.AI.Type,
 			OpenAI: openai.Configuration{
-				APIKey: os.Getenv("OPENAI_API_KEY"),
+				APIKey: avaCfg.AI.OpenAI.APIKey,
 			},
 		})
 		if err != nil {

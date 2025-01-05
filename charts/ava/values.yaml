@@ -5,13 +5,13 @@
 replicaCount: 1
 
 image:
-  repository: matthish29/ava
+  repository: ghcr.io/matthisholleville/ava
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "v0.1.0"
 
 initImage:
-  repository: matthish29/ava-init
+  repository: ghcr.io/matthisholleville/ava-init
   pullPolicy: IfNotPresent
   tag: "v0.1.0"
 
@@ -92,6 +92,45 @@ serviceMonitor:
 env:
   - name: ENABLE_EXECUTORS_ON_WEBHOOK
     value: "false"
+  - name: SLACK_VALIDATION_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: slack-secret
+        key: validation-token
+  - name: SLACK_BOT_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: slack-secret
+        key: bot-token
+
+configuration:
+  # knowledge:
+  #   github:
+  #     token: ${GITHUB_AUTH_TOKEN}
+
+  executors:
+    enabled: true
+
+  ai:
+    type: openai
+    openai:
+      apiKey: ${OPENAI_API_KEY}
+
+  api:
+    chat:
+      enabled: true
+    knowledge:
+      enabled: true
+    events:
+      enabled: true
+    swagger:
+      enabled: true
+
+  events:
+    type: slack
+    slack:
+      validationToken: ${SLACK_VALIDATION_TOKEN}
+      botToken: ${SLACK_BOT_TOKEN}
 
 postgresql:
   enabled: true

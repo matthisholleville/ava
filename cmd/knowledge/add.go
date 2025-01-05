@@ -16,8 +16,8 @@ package knowledge
 
 import (
 	"fmt"
-	"os"
 
+	avaCfg "github.com/matthisholleville/ava/internal/configuration"
 	"github.com/matthisholleville/ava/pkg/ai/openai"
 	backendKnowledge "github.com/matthisholleville/ava/pkg/knowledge/backend"
 	sourceKnowledge "github.com/matthisholleville/ava/pkg/knowledge/source"
@@ -45,11 +45,12 @@ var addCmd = &cobra.Command{
 	Long:  `Add a new document to Ava's knowledge base.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := viper.Get("logger").(logger.ILogger)
+		avaCfg := avaCfg.LoadConfiguration(logger)
 		logger.Info("Adding a new documents to Ava's knowledge base")
 		backendKnowledge, err := backendKnowledge.NewBackendKnowledge(backendKnowledge.KnowledgeConfiguration{
-			ActiveProvider: "openai",
+			ActiveProvider: avaCfg.AI.Type,
 			OpenAI: openai.Configuration{
-				APIKey: os.Getenv("OPENAI_API_KEY"),
+				APIKey: avaCfg.AI.OpenAI.APIKey,
 			},
 		})
 		if err != nil {

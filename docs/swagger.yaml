@@ -22,12 +22,6 @@ definitions:
     type: object
   api.CreateNewChat:
     properties:
-      backend:
-        example: openai
-        type: string
-      enableExecutors:
-        example: true
-        type: boolean
       language:
         example: en
         type: string
@@ -37,9 +31,6 @@ definitions:
     type: object
   api.CreateNewKnowledge:
     properties:
-      backend:
-        example: openai
-        type: string
       gitAuthToken:
         example: ""
         type: string
@@ -71,10 +62,6 @@ definitions:
         type: string
     type: object
   api.PurgeKnowledge:
-    properties:
-      backend:
-        example: openai
-        type: string
     type: object
   api.SuccessResponse:
     properties:
@@ -392,7 +379,7 @@ paths:
             $ref: '#/definitions/api.ErrorResponse'
       summary: Receive a Slack event and chat with Ava
       tags:
-      - Chat
+      - Event
   /knowledge:
     delete:
       consumes:

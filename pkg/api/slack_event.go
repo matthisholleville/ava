@@ -15,6 +15,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -28,7 +29,7 @@ import (
 // Event godoc
 // @Summary Receive a Slack event and chat with Ava
 // @Description used to chat with Ava when a slack event is received
-// @Tags Chat
+// @Tags Event
 // @Accept json
 // @Produce json
 // @Router /event/slack [post]
@@ -59,27 +60,26 @@ func (s *Server) slackEventHandler(echo echo.Context) error {
 		var threadID string
 		message, threadID, err := s.eventClient.ProcessEvent(data)
 		if err != nil {
-			s.logger.Error(err.Error())
+			s.logger.Warn(fmt.Sprintf("Event ignored: %s", err.Error()))
 			return
 		}
 
 		// Check if executors are enabled and set default value to false
-		isExecutorsEnabled := os.Getenv("ENABLE_EXECUTORS_ON_WEBHOOK") == "true"
 		chat, err := chat.NewChat(
-			"openai",
-			os.Getenv("OPENAI_API_KEY"),
+			s.aiBackend,
+			s.aiBackendPassword,
 			s.logger,
 			chat.WithLanguage("en"),
 			chat.WithDbClient(s.db),
 			chat.WithPersist(true),
-			chat.WithConfigureAssistant(s.logger, isExecutorsEnabled),
+			chat.WithConfigureAssistant(s.logger, s.enableExecutors),
 		)
 		if err != nil {
 			s.logger.Fatal(err.Error())
 			return
 		}
 
-		s.eventClient.SendMessage(data.Event.Channel, ":eyes:", data.Event.TS)
+		s.eventClient.SendLookingMessage(data.Event.Channel, data.Event.TS)
 
 		// If threadID is empty, we need to initialize the chat
 		if threadID == "" {

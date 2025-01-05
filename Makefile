@@ -6,7 +6,7 @@ TAG?=latest
 VERSION:="v0.1.0"
 
 NAME:=ava
-DOCKER_REPOSITORY:=matthish29
+DOCKER_REPOSITORY:=ghcr.io/matthisholleville
 DOCKER_IMAGE_NAME:=$(DOCKER_REPOSITORY)/$(NAME)
 
 ifeq ($(origin VERSION), undefined)

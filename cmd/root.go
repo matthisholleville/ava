@@ -15,6 +15,9 @@
 package cmd
 
 import (
+	"os"
+	"strings"
+
 	"github.com/matthisholleville/ava/cmd/chat"
 	"github.com/matthisholleville/ava/cmd/knowledge"
 	"github.com/matthisholleville/ava/cmd/serve"
@@ -29,6 +32,7 @@ var (
 	Date      string
 	LogFormat string
 	LogLevel  string
+	cfgFile   string
 )
 
 var rootCmd = &cobra.Command{
@@ -48,9 +52,31 @@ func init() {
 	rootCmd.AddCommand(serve.ServeCmd)
 	rootCmd.PersistentFlags().StringVarP(&LogFormat, "log-format", "f", "raw", "Log format")
 	rootCmd.PersistentFlags().StringVarP(&LogLevel, "log-level", "l", "debug", "Log level")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "./config/", "config file (default is $pwd/config/ava.yaml)")
 }
 
 func initConfig() {
 	logger := logger.InitLogger(LogFormat, LogLevel)
 	viper.Set("logger", logger)
+
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(cfgFile)
+	viper.SetConfigName("ava.yaml")
+	if err := viper.ReadInConfig(); err != nil {
+		panic("unable to read ava configuration.")
+	}
+	for _, k := range viper.AllKeys() {
+		value := viper.GetString(k)
+		if strings.HasPrefix(value, "${") && strings.HasSuffix(value, "}") {
+			viper.Set(k, getEnvOrPanic(strings.TrimSuffix(strings.TrimPrefix(value, "${"), "}")))
+		}
+	}
+}
+
+func getEnvOrPanic(env string) string {
+	res := os.Getenv(env)
+	if len(res) == 0 {
+		panic("Mandatory env variable not found:" + env)
+	}
+	return res
 }

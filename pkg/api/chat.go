@@ -17,7 +17,6 @@ package api
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"slices"
 
 	"github.com/labstack/echo/v4"
@@ -28,10 +27,8 @@ import (
 
 // CreateNewChat  Create program.
 type CreateNewChat struct {
-	Message         string `json:"message" example:"Pod web-server-5b866987d8-sxmtj in namespace default Crashlooping."`
-	Language        string `json:"language,omitempty" example:"en"`
-	Backend         string `json:"backend,omitempty" example:"openai"`
-	EnableExecutors bool   `json:"enableExecutors,omitempty" example:"true"`
+	Message  string `json:"message" example:"Pod web-server-5b866987d8-sxmtj in namespace default Crashlooping."`
+	Language string `json:"language,omitempty" example:"en"`
 }
 
 type Alert struct {
@@ -85,16 +82,14 @@ func (s *Server) alertManagerWebhookChatHandler(echo echo.Context) error {
 		return s.JSONResponseWithCode(echo, "no alerts to process", http.StatusCreated)
 	}
 
-	// Check if executors are enabled and set default value to false
-	isExecutorsEnabled := os.Getenv("ENABLE_EXECUTORS_ON_WEBHOOK") == "true"
 	chat, err := chat.NewChat(
-		"openai",
-		os.Getenv("OPENAI_API_KEY"),
+		s.aiBackend,
+		s.aiBackendPassword,
 		s.logger,
 		chat.WithLanguage("en"),
 		chat.WithDbClient(s.db),
 		chat.WithPersist(true),
-		chat.WithConfigureAssistant(s.logger, isExecutorsEnabled),
+		chat.WithConfigureAssistant(s.logger, s.enableExecutors),
 	)
 	if err != nil {
 		s.logger.Fatal(err.Error())
@@ -182,13 +177,13 @@ func (s *Server) createChatHandler(echo echo.Context) error {
 	}
 
 	chat, err := chat.NewChat(
-		data.Backend,
-		os.Getenv("OPENAI_API_KEY"),
+		s.aiBackend,
+		s.aiBackendPassword,
 		s.logger,
 		chat.WithLanguage(data.Language),
 		chat.WithDbClient(s.db),
 		chat.WithPersist(true),
-		chat.WithConfigureAssistant(s.logger, data.EnableExecutors),
+		chat.WithConfigureAssistant(s.logger, s.enableExecutors),
 	)
 	if err != nil {
 		s.logger.Fatal(err.Error())
@@ -248,8 +243,8 @@ type FetchMessagesResponse struct {
 func (s *Server) fetchChatHandler(echo echo.Context) error {
 	id := echo.Param("id")
 	chat, err := chat.NewChat(
-		"openai",
-		os.Getenv("OPENAI_API_KEY"),
+		s.aiBackend,
+		s.aiBackendPassword,
 		s.logger,
 		chat.WithDbClient(s.db),
 	)
@@ -302,13 +297,13 @@ func (s *Server) respondChatHandler(echo echo.Context) error {
 	}
 
 	chat, err := chat.NewChat(
-		"openai",
-		os.Getenv("OPENAI_API_KEY"),
+		s.aiBackend,
+		s.aiBackendPassword,
 		s.logger,
 		chat.WithLanguage("en"),
 		chat.WithDbClient(s.db),
 		chat.WithPersist(true),
-		chat.WithConfigureAssistant(s.logger, data.EnableExecutors),
+		chat.WithConfigureAssistant(s.logger, s.enableExecutors),
 	)
 	if err != nil {
 		s.logger.Fatal(err.Error())

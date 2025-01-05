@@ -1,0 +1,27 @@
+# knowledge:
+#   github:
+#     token: ${GITHUB_AUTH_TOKEN}
+
+executors:
+  enabled: true
+
+ai:
+  type: openai
+  openai:
+    apiKey: ${OPENAI_API_KEY}
+
+api:
+  chat:
+    enabled: true
+  knowledge:
+    enabled: true
+  events:
+    enabled: true
+  swagger:
+    enabled: true
+
+# events:
+#   type: slack
+#   slack:
+#     validationToken: ${SLACK_VALIDATION_TOKEN}
+#     botToken: ${SLACK_BOT_TOKEN}

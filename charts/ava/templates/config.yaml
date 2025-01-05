@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ava.fullname" . }}-config
+data:
+  ava.yaml: |
+    {{- toYaml .Values.configuration | nindent 4 }}

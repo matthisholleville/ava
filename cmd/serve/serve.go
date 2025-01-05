@@ -17,6 +17,7 @@ package serve
 import (
 	"time"
 
+	avaCfg "github.com/matthisholleville/ava/internal/configuration"
 	"github.com/matthisholleville/ava/pkg/api"
 	"github.com/matthisholleville/ava/pkg/logger"
 	"github.com/matthisholleville/ava/pkg/signals"
@@ -39,7 +40,7 @@ var ServeCmd = &cobra.Command{
 	Long:  `Serve Ava API.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := viper.Get("logger").(logger.ILogger)
-
+		avaCfg := avaCfg.LoadConfiguration(logger)
 		logger.Info("Serving Ava API")
 
 		// Start the server
@@ -52,7 +53,10 @@ var ServeCmd = &cobra.Command{
 			Unready:           ready,
 		}
 
-		server, _ := api.NewServer(serverConfig, logger)
+		server, err := api.NewServer(serverConfig, logger, avaCfg)
+		if err != nil {
+			logger.Fatal(err.Error())
+		}
 		httpServer, healthy, ready := server.ListenAndServe()
 
 		// graceful shutdown

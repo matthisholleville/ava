@@ -32,12 +32,6 @@ WORKDIR /home/app
 COPY --from=builder /ava/bin/ava .
 RUN chown -R app:app ./
 
-WORKDIR /home/app/config
-
-COPY --from=builder /ava/config .
-
-WORKDIR /home/app
-
 USER app
 
 EXPOSE 8080

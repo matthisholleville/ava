@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/matthisholleville/ava/pkg/logger"
@@ -44,12 +45,12 @@ type WebExecutors struct {
 }
 
 type AI struct {
-	Type   string `json:"type,omitempty" example:"openai"`
-	OpenAI OpenAI `json:"openai,omitempty"`
+	Type   string `yaml:"type,omitempty" example:"openai"`
+	OpenAI OpenAI `yaml:"openai,omitempty"`
 }
 
 type OpenAI struct {
-	APIKey string `json:"apiKey,omitempty" example:""`
+	APIKey string `yaml:"apiKey,omitempty" example:""`
 }
 
 type API struct {
@@ -76,13 +77,45 @@ type EventsAPI struct {
 }
 
 type Events struct {
-	Type  string      `json:"type,omitempty" example:"slack"`
-	Slack SlackEvents `json:"slack,omitempty"`
+	Type  string      `yaml:"type,omitempty" example:"slack"`
+	Slack SlackEvents `yaml:"slack,omitempty"`
 }
 
 type SlackEvents struct {
-	ValidationToken string `json:"validation_token,omitempty"`
-	BotToken        string `json:"bot_token,omitempty"`
+	ValidationToken string `yaml:"validation_token,omitempty"`
+	BotToken        string `yaml:"bot_token,omitempty"`
+}
+
+func WriteInitConfig(logger logger.ILogger) {
+	// Define default values for the configuration
+	viper.SetDefault("executors.enabled", true)
+	viper.SetDefault("executors.k8s.write", false)
+	viper.SetDefault("executors.k8s.read", true)
+	viper.SetDefault("executors.common.enabled", true)
+	viper.SetDefault("executors.web.enabled", true)
+
+	viper.SetDefault("ai.type", "openai")
+	viper.SetDefault("ai.openai.apiKey", "${OPENAI_API_KEY}")
+
+	viper.SetDefault("api.chat.enabled", true)
+	viper.SetDefault("api.knowledge.enabled", true)
+	viper.SetDefault("api.events.enabled", true)
+	viper.SetDefault("api.swagger.enabled", true)
+
+	viper.SetDefault("events.type", "slack")
+	viper.SetDefault("events.slack.validationToken", "${SLACK_VALIDATION_TOKEN}")
+	viper.SetDefault("events.slack.botToken", "${SLACK_BOT_TOKEN}")
+
+	// Write the default configuration to a file
+	if err := viper.SafeWriteConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileAlreadyExistsError); ok {
+			logger.Debug("Configuration file already exists. No changes made.")
+		} else {
+			logger.Fatal(fmt.Sprintf("Unable to write configuration file: %v", err))
+		}
+	} else {
+		logger.Info("Default configuration written successfully")
+	}
 }
 
 func LoadConfiguration(logger logger.ILogger) *Configuration {

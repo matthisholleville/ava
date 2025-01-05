@@ -21,9 +21,9 @@ Give it your runbooks, use existing executors (functions), or create your own fu
 
 **This system is experimental and should not be used in production without fully understanding the risks.**
 
-## Motivations Behind Ava
+## Motivations Behind `Ava`
 
-The motivation for creating Ava comes from my personal experience during on-call rotations. I wanted to make these moments—especially the ones that happen at night—easier for the SRE teams by automating as many repetitive tasks as possible using AI and a knowledge base (runbook). 
+The motivation for creating `Ava` comes from my personal experience during on-call rotations. I wanted to make these moments—especially the ones that happen at night—easier for the SRE teams by automating as many repetitive tasks as possible using AI and a knowledge base (runbook). 
 
 When alerts arrive in our team chat, we often find ourselves repeating the same actions:
 - Checking monitoring dashboards
@@ -31,9 +31,9 @@ When alerts arrive in our team chat, we often find ourselves repeating the same 
 - Calling a URL to verify if a service is operational
 - etc..
 
-The idea behind Ava is to handle these repetitive steps automatically. My goal is that PagerDuty or others contacts the OnCall team only after these routine tasks are completed, allowing the team to focus on solving the core complexity of the issue. If Ava can mitigate or even fix the problem on its own, that’s a huge bonus.
+The idea behind `Ava` is to handle these repetitive steps automatically. My goal is that PagerDuty or others contacts the OnCall team only after these routine tasks are completed, allowing the team to focus on solving the core complexity of the issue. If `Ava` can mitigate or even fix the problem on its own, that’s a huge bonus.
 
-To achieve this, I’ve built Ava using an REAct AI model powered by OpenAI Assistant. Ava understands alerts, investigates the issues, and takes actions (or provides mitigations) based on the runbooks I’ve uploaded into OpenAI’s vector store.
+To achieve this, I’ve built `Ava` using an REAct AI model powered by OpenAI Assistant. `Ava` understands alerts, investigates the issues, and takes actions (or provides mitigations) based on the runbooks I’ve uploaded into OpenAI’s vector store.
 
 ## Features
 
@@ -68,11 +68,17 @@ To achieve this, I’ve built Ava using an REAct AI model powered by OpenAI Assi
 
 ## Configuration
 
-A.V.A uses a configuration file to set up its usage. By default, this file is located at `./config/ava.yaml`. You can change the configuration folder using the `--config` flag.
+Ava uses a configuration file to set up its usage. By default, this file is located at `$XDG_CONFIG_HOME/ava.yaml`. You can change the configuration folder using the `--config` flag.
 
-This file is essential, and A.V.A cannot start without it. It should not contain sensitive data. For such cases, you can use environment variables.
+| OS | Path |
+| ------- | ------------------------------------------------ |
+| MacOS | ~/Library/Application Support/ava/ava.yaml |
+| Linux | ~/.config/ava/ava.yaml |
+| Windows | %LOCALAPPDATA%/ava/ava.yaml |
 
-When starting up, A.V.A parses the configuration file. If it detects a value matching the pattern `${.*}`, it will extract the content and check if an environment variable exists with that name. If not, the program will fail and return an error log.
+This file is essential, and Ava cannot start without it. It should not contain sensitive data. For such cases, you can use environment variables.
+
+When starting up, Ava parses the configuration file. If it detects a value matching the pattern `${.*}`, it will extract the content and check if an environment variable exists with that name. If not, the program will fail and return an error log.
 
 
 ## Usage
@@ -115,13 +121,13 @@ ava knowledge add -s git -r https://github.com/MyPrivateOrg/my-private-repositor
 
 ## Analysis Mode
 
-In its default version, A.V.A greatly accelerates the resolution phase by providing assistance for a problem based on the runbooks you’ve uploaded into its knowledge base. This ensures that, regardless of the user handling the issue, they don’t need to locate the right runbook, connect to the correct tool, etc. Additionally, if the problem isn’t covered by a runbook, Ava can leverage the AI model’s knowledge base to guide the user.
+In its default version, Ava greatly accelerates the resolution phase by providing assistance for a problem based on the runbooks you’ve uploaded into its knowledge base. This ensures that, regardless of the user handling the issue, they don’t need to locate the right runbook, connect to the correct tool, etc. Additionally, if the problem isn’t covered by a runbook, Ava can leverage the AI model’s knowledge base to guide the user.
 
 ## Automatic Fix Mode
 
-**Warning: This mode is experimental and takes actions (see the Executors section below) on the environment where A.V.A is deployed.**
+**Warning: This mode is experimental and takes actions (see the Executors section below) on the environment where Ava is deployed.**
 
-This optional mode allows A.V.A to attempt to fix the problem automatically using its list of available Executors. This mode enables rapid mitigation of issues, reducing stress and mental load for the operator in charge of fixing the problem. It allows the operator to focus on problem-solving while minimizing the chances of human error and avoiding repetitive tasks.
+This optional mode allows Ava to attempt to fix the problem automatically using its list of available Executors. This mode enables rapid mitigation of issues, reducing stress and mental load for the operator in charge of fixing the problem. It allows the operator to focus on problem-solving while minimizing the chances of human error and avoiding repetitive tasks.
 
 ### How to enable automatic fix mode
 
@@ -244,7 +250,6 @@ Once launched, you can access the Swagger documentation at the following URL: [h
 
 ## Roadmap
 
-- Connect Ava to Slack (or other platforms) to update alert statuses in a channel.
 - Create new executors for Kubernetes, databases (e.g., killing a PID), Prometheus, and Grafana (e.g., getting dashboard screenshots).
 - Allow importing knowledge bases from other sources (e.g., Backstage, Notion).
 - Support other AI backends (e.g., Llama, Gemini).
@@ -258,10 +263,10 @@ Once launched, you can access the Swagger documentation at the following URL: [h
 
 ### Installation
 
-Before connecting Slack, you must deploy A.V.A. To connect A.V.A to Slack, follow the steps below:
+Before connecting Slack, you must deploy Ava. To connect Ava to Slack, follow the steps below:
 
 1. Create a [new Slack App](https://api.slack.com/apps) named `Ava Bot`. **The name is crucial and must not be changed!**
-2. Copy the `Verification Token` from the `Basic Information` page and the `Bot User OAuth Token` from the `OAuth & Permissions` page of your Slack application, then paste them into Ava's configuration file (e.g., `./config/ava.yaml` or `./charts/ava/values.yaml` if you uses Kubernetes):
+2. Copy the `Verification Token` from the `Basic Information` page and the `Bot User OAuth Token` from the `OAuth & Permissions` page of your Slack application, then paste them into Ava's configuration file (e.g., `ava config edit` or `./charts/ava/values.yaml` if you uses Kubernetes):
     ```yaml
     # ava config
     events:
@@ -271,19 +276,19 @@ Before connecting Slack, you must deploy A.V.A. To connect A.V.A to Slack, follo
             botToken: ${SLACK_BOT_TOKEN}
     ```
     - **If you use Kubernetes dont forget to create the K8s secret for Slack** `kubectl create secret generic slack-secret --from-literal=validation-token=$(echo $SLACK_VALIDATION_TOKEN) --from-literal=bot-token=$(echo $SLACK_BOT_TOKEN)`
-3. Start A.V.A in server mode with a publicly accessible URL so Slack can send events.
+3. Start Ava in server mode with a publicly accessible URL so Slack can send events.
 4. On the `Event Subscriptions` page, enable events and add your URL in the `Request URL` section (`$MY_URL/event/slack`).
 5. Further down on the same page, open the `Subscribe to bot events` section and add the permissions `message:channels` and `message:groups`.
 6. On the `OAuth & Permissions` page, add the scopes `chat:write`, `users.profile:read`, and `users:read`.
 7. Install your app into the desired channel(s).
 
-You can test the setup by sending a direct message to your bot: `@Ava Bot Hello how are you today?`. You should see A.V.A react to the event in its logs and send a Slack message containing `👀`.
+You can test the setup by sending a direct message to your bot: `@Ava Bot Hello how are you today?`. You should see Ava react to the event in its logs and send a Slack message containing `👀`.
 
-### Interacting with A.V.A
+### Interacting with Ava
 
-To start interacting with A.V.A, you can:
+To start interacting with Ava, you can:
 - Begin your message by mentioning it: `@Ava Bot my pod example is crashlooping. Do we have any runbook to understand & fix the problem?`
-- Configure AlertManager to send a Slack message. A.V.A will respond not only when mentioned but also to messages from other bots.
+- Configure AlertManager to send a Slack message. Ava will respond not only when mentioned but also to messages from other bots.
 
 </details>
 

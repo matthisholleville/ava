@@ -41,7 +41,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args: ["serve", "-f", "json", "--config", "/etc/ava/"]
+          args: ["serve", "-f", "json", "--config", "/etc/ava/ava.yaml"]
           volumeMounts:
             - name: {{ include "ava.fullname" . }}-config
               mountPath: /etc/ava

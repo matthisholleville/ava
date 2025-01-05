@@ -15,12 +15,17 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/adrg/xdg"
 	"github.com/matthisholleville/ava/cmd/chat"
+	"github.com/matthisholleville/ava/cmd/config"
 	"github.com/matthisholleville/ava/cmd/knowledge"
 	"github.com/matthisholleville/ava/cmd/serve"
+	"github.com/matthisholleville/ava/internal/configuration"
 	"github.com/matthisholleville/ava/pkg/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -50,20 +55,33 @@ func init() {
 	rootCmd.AddCommand(knowledge.KnowledgeCmd)
 	rootCmd.AddCommand(chat.ChatCmd)
 	rootCmd.AddCommand(serve.ServeCmd)
+	rootCmd.AddCommand(config.ConfigCmd)
 	rootCmd.PersistentFlags().StringVarP(&LogFormat, "log-format", "f", "raw", "Log format")
 	rootCmd.PersistentFlags().StringVarP(&LogLevel, "log-level", "l", "debug", "Log level")
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "./config/", "config file (default is $pwd/config/ava.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("Default config file (%s/ava/ava.yaml)", xdg.ConfigHome))
 }
 
 func initConfig() {
 	logger := logger.InitLogger(LogFormat, LogLevel)
-	viper.Set("logger", logger)
 
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(cfgFile)
-	viper.SetConfigName("ava.yaml")
+	if cfgFile != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(cfgFile)
+	} else {
+		fmt.Println(xdg.ConfigHome)
+		configDir := filepath.Join(xdg.ConfigHome, "ava")
+
+		viper.AddConfigPath(configDir)
+		viper.SetConfigType("yaml")
+		viper.SetConfigName("ava")
+
+		os.MkdirAll(configDir, 0755)
+
+		configuration.WriteInitConfig(logger)
+	}
+
 	if err := viper.ReadInConfig(); err != nil {
-		panic("unable to read ava configuration.")
+		panic(fmt.Sprintf("unable to read ava configuration : %s.", cfgFile))
 	}
 	for _, k := range viper.AllKeys() {
 		value := viper.GetString(k)
@@ -71,6 +89,8 @@ func initConfig() {
 			viper.Set(k, getEnvOrPanic(strings.TrimSuffix(strings.TrimPrefix(value, "${"), "}")))
 		}
 	}
+
+	viper.Set("logger", logger)
 }
 
 func getEnvOrPanic(env string) string {

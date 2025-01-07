@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/matthisholleville/ava/compare/v0.1.0...v0.1.1) (2025-01-07)
+
+
+### Features
+
+* enhance Kubernetes executor documentation and functionality ([43ef02b](https://github.com/matthisholleville/ava/commit/43ef02b938c577b4fa1ad79e3f64a93e32100d58))
+
 ## 0.1.0 (2025-01-05)
 
 

@@ -15,6 +15,7 @@
 package kubernetes
 
 import (
+	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
@@ -38,6 +39,10 @@ func (c *Client) GetRestClient() rest.Interface {
 
 func (c *Client) GetMetricsClient() versioned.Interface {
 	return &c.MetricsClient
+}
+
+func (c *Client) GetApiExtensionClient() *clientset.Clientset {
+	return &c.ApiExtensionClient
 }
 
 func NewClient(kubecontext string, kubeconfig string) (*Client, error) {

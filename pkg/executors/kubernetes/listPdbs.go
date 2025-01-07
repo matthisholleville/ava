@@ -21,19 +21,19 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type GetCronJobs struct {
+type ListPDBs struct {
 	NamespaceName string `json:"namespaceName"`
 }
 
-func (GetCronJobs) GetName() string {
-	return "getCronJobs"
+func (ListPDBs) GetName() string {
+	return "listPDBs"
 }
 
-func (GetCronJobs) GetDescription() string {
-	return "List all CronJobs in a namespace"
+func (ListPDBs) GetDescription() string {
+	return "List all PodDisruptionBudgets (PDBs) in a namespace"
 }
 
-func (GetCronJobs) GetParams() string {
+func (ListPDBs) GetParams() string {
 	return `
 	{
 		"type": "object",
@@ -46,16 +46,16 @@ func (GetCronJobs) GetParams() string {
 	`
 }
 
-func (GetCronJobs) Exec(e common.Executor, jsonString string) string {
-	var cronJobInfo GetCronJobs
-	err := json.Unmarshal([]byte(jsonString), &cronJobInfo)
+func (ListPDBs) Exec(e common.Executor, jsonString string) string {
+	var pdbInfo ListPDBs
+	err := json.Unmarshal([]byte(jsonString), &pdbInfo)
 	if err != nil {
-		return "Error while retrieving the NamespaceName parameter: " + err.Error()
+		return "Error while retrieving parameters: " + err.Error()
 	}
-	cronJobs, err := e.Client.GetClient().BatchV1beta1().CronJobs(cronJobInfo.NamespaceName).List(e.Context, metav1.ListOptions{})
+	pdbs, err := e.Client.GetClient().PolicyV1().PodDisruptionBudgets(pdbInfo.NamespaceName).List(e.Context, metav1.ListOptions{})
 	if err != nil {
-		return "Unable to list CronJobs: " + err.Error()
+		return "Unable to list PDBs: " + err.Error()
 	}
-	result, _ := json.Marshal(cronJobs)
+	result, _ := json.Marshal(pdbs)
 	return string(result)
 }

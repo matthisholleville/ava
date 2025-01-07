@@ -15,6 +15,7 @@
 package kubernetes
 
 import (
+	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -22,9 +23,10 @@ import (
 )
 
 type Client struct {
-	Client        kubernetes.Interface
-	MetricsClient versioned.Clientset
-	RestClient    rest.Interface
-	Config        *rest.Config
-	ServerVersion *version.Info
+	Client             kubernetes.Interface
+	MetricsClient      versioned.Clientset
+	ApiExtensionClient clientset.Clientset
+	RestClient         rest.Interface
+	Config             *rest.Config
+	ServerVersion      *version.Info
 }

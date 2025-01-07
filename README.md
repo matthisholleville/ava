@@ -187,21 +187,58 @@ Executors are functions Ava can use to act on your system. OpenAI does not perfo
 
 #### Built-in Executors
 
-##### Kubernetes
+<details>
+
+<summary>Kubernetes</summary>
 
 
 ##### Read-only
 
-- `describeService`: Describe details of a service.
-- `getCronJobs`:  List all CronJobs in a namespace.
-- `getDeployment`: Retrieve details of a deployment.
-- `getHPA`: Retrieve the status of Horizontal Pod Autoscalers in a namespace.
-- `getNode`: Get the details of a node.
-- `getPod`: Gets pod details.
-- `listNamespaces`: List all namespaces in the cluster.
-- `listPods`: Lists pods in a namespace.
-- `podLogs`: Shows the last 100 lines of pod logs.
-- `topPods`: Retrieve CPU and memory usage of all pods in a namespace.
+- `getClusterRole`: Retrieve details of a specific ClusterRole
+- `getCronJob`: Retrieve details of a specific CronJob
+- `getConfigMap`: Retrieve details of a specific ConfigMap
+- `getCrd`: Retrieve details of a CustomResourceDefinition (CRD)
+- `getDaemonSet`: Retrieve details of a specific DaemonSet
+- `getDeployment`: Retrieve details of a specific Deployment
+- `getEndpointSlices`: Retrieve details of a specific EndpointSlice
+- `getHPA`: Retrieve details of a specific HorizontalPodAutoscaler
+- `getIngress`: Retrieve details of a specific Ingress
+- `getLimitRange`: Retrieve details of a specific LimitRange
+- `getJob`: Retrieve details of a specific Job
+- `getNode`: Retrieve details of a specific Node
+- `getPod`: Retrieve details of a specific Pod
+- `getPdb`: Retrieve details of a specific PodDisruptionBudget
+- `getPersistentVolume`: Retrieve details of a specific PersistentVolume
+- `getPersistentVolumeClaim`: Retrieve details of a specific PersistentVolumeClaim
+- `getRole`: Retrieve details of a specific Role
+- `getRoleBinding`: Retrieve details of a specific RoleBinding
+- `getServiceAccount`: Retrieve details of a specific ServiceAccount
+- `getSecret`: Retrieve details of a specific Secret
+- `getStorageClass`: Retrieve details of a specific StorageClass
+- `getStatefulSet`: Retrieve details of a specific StatefulSet
+- `listClusterRoles`: List all ClusterRoles in the cluster
+- `listCrds`: List all CustomResourceDefinitions (CRDs) in the cluster
+- `listCronJobs`: List all CronJobs in a namespace
+- `listConfigMaps`: List all ConfigMaps in a namespace
+- `listDaemonSets`: List all DaemonSets in a namespace
+- `listDeployments`: List all Deployments in a namespace
+- `listEndpointSlices`: List all EndpointSlices in a namespace
+- `listIngresses`: List all Ingresses in a namespace
+- `listJobs`: List all Jobs in a namespace
+- `listLimitRanges`: List all LimitRanges in a namespace
+- `listNamespaces`: List all Namespaces in the cluster
+- `listServicesAccounts`: List all ServiceAccounts in a namespace
+- `listSecrets`: List all Secrets in a namespace
+- `listStorageClasses`: List all StorageClasses in the cluster
+- `listStatefulSets`: List all StatefulSets in a namespace
+- `listPods`: List all Pods in a namespace
+- `listPersistentVolumes`: List all PersistentVolumes in the cluster
+- `listPersistentVolumeClaims`: List all PersistentVolumeClaims in a namespace
+- `listPdbs`: List all PodDisruptionBudgets in a namespace
+- `listRoles`: List all Roles in a namespace
+- `listRoleBindings`: List all RoleBindings in a namespace
+- `podLogs`: Retrieve logs of a specific Pod
+- `topPods`: Show resource usage for Pods in a namespace       
 
 ##### Write
 
@@ -210,13 +247,23 @@ Executors are functions Ava can use to act on your system. OpenAI does not perfo
 - `deletePod`: Delete a pod.
 - `rolloutDeployment`: Perform a rollout restart for a deployment.
 
-##### Common
+</details>
+
+<details>
+
+<summary>Common</summary>
 
 - `wait`: Waits before the next action.
 
-##### Web
+</details>
+
+<details>
+
+<summary>Web</summary>
 
 - `getUrl`: Makes a `GET` request to a URL and returns status and timing.
+
+</details>
 
 ## Serve Mode
 
